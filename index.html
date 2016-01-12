@@ -18,13 +18,13 @@
       'Try MEGA directly',
       'Report issue',
     ];
+    
+    var href = 'https://mega.nz' + location.hash;
   
     if (!navigator.serviceWorker) {
       showMessage(messages[0])
       return;
     }
-    
-    var href = 'https://mega.nz' + location.hash;
     
     navigator.serviceWorker.register('sw.min.js', {scope: '.'})
     .then(navigator.serviceWorker.ready)
