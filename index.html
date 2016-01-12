@@ -1,0 +1,83 @@
+<!doctype html> <!-- Required by the specification -->
+<html lang=pt-BR> <!-- Without <html lang="..."> screen readers need to guess language -->
+<meta charset=utf-8> <!-- Many problems without this (security, presentation, etc) -->
+<title>Direct MEGA</title> <!-- Required by the specification -->
+<meta name=viewport content="width=device-width,initial-scale=1"> <!-- To work in mobile -->
+<meta content=yes name=mobile-web-app-capable> <!-- To allow be installed as a webapp -->
+<style>body {text-align: center;} </style>
+<noscript>Both MEGA and this page requires JavaScript enabled</noscript>
+<div id="output">Loading...</div>
+<script>
+  (function () {
+    // For future translation
+    var messages = [
+      'Incompatible browser, wait for updates',
+      'No file defined',
+      'Download starting. You can now close this window.',
+      'Unknown error, wait for updates',
+      'Try MEGA directly',
+      'Report issue',
+    ];
+  
+    if (!navigator.serviceWorker) {
+      showMessage(messages[0])
+      return;
+    }
+    
+    var href = 'https://mega.nz' + location.hash;
+    
+    navigator.serviceWorker.register('sw.min.js', {scope: '.'})
+    .then(navigator.serviceWorker.ready)
+    .then(function(instance){
+      if (location.hash.length <= 1) {
+        showMessage(messages[1], true);
+        return;
+      }
+      
+      sendMessage(instance.active, href).then(function (data) {
+        location.href = './?' + data.identifier;
+        showMessage(messages[2], true);
+        setTimeout(function () {
+          window.close();
+        }, 1000);
+      });
+    }, function () {
+      showMessage(messages[3]);
+    });
+    
+    function showMessage(message, noError) {
+      var output = document.getElementById('output');
+      output.textContent = message;
+      output.appendChild(document.createElement('br'));
+      
+      if (noError) return;
+      
+      var anchor = document.createElement('a');
+      anchor.textContent = messages[4];
+      anchor.href = href;
+      output.appendChild(anchor);
+      output.appendChild(document.createElement('br'));
+      
+      anchor = document.createElement('a');
+      anchor.textContent = messages[5];
+      anchor.href = 'https://github.com/qgustavor/direct-mega/issues/new';
+      output.appendChild(anchor);
+    }
+    
+    // https://googlechrome.github.io/samples/service-worker/post-message/
+    function sendMessage(instance, message) {
+      return new Promise(function(resolve, reject) {
+        var messageChannel = new MessageChannel();
+        messageChannel.port1.onmessage = function(event) {
+          if (event.data.error) {
+            reject(event.data.error);
+          } else {
+            resolve(event.data);
+          }
+        };
+        
+        instance.postMessage(message, [messageChannel.port2]);
+      });
+    }
+  }());
+</script>
