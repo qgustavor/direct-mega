@@ -13,7 +13,7 @@
     var messages = [
       'Incompatible browser, wait for updates',
       'No file defined',
-      'Download starting. You can now close this window.',
+      'After the download starts you can now close this window.',
       'Unknown error, wait for updates',
       'Try MEGA directly',
       'Report issue',
@@ -42,9 +42,6 @@
       sendMessage(instance.active, href).then(function (data) {
         location.href = './?' + data.identifier;
         showMessage(messages[2], true);
-        setTimeout(function () {
-          window.close();
-        }, 20e3);
       });
     }, function () {
       showMessage(messages[3]);
