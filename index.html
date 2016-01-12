@@ -6,7 +6,7 @@
 <meta content=yes name=mobile-web-app-capable> <!-- To allow be installed as a webapp -->
 <style>body {text-align: center;} </style>
 <noscript>Both MEGA and this page requires JavaScript enabled</noscript>
-<div id="output">Loading...</div>
+<div id="output">Installing Direct MEGA (it happens just one time)</div>
 <script>
   (function () {
     // For future translation
@@ -28,9 +28,14 @@
     
     navigator.serviceWorker.register('sw.min.js', {scope: '.'})
     .then(navigator.serviceWorker.ready)
-    .then(function(instance){
+    .then(function afterReady(instance){
       if (location.hash.length <= 1) {
         showMessage(messages[1], true);
+        return;
+      }
+      
+      if (!instance.active) {
+        location.reload();
         return;
       }
       
@@ -39,7 +44,7 @@
         showMessage(messages[2], true);
         setTimeout(function () {
           window.close();
-        }, 10e3);
+        }, 20e3);
       });
     }, function () {
       showMessage(messages[3]);
