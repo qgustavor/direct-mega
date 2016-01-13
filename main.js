@@ -8,8 +8,9 @@
     'Unknown error, loading fallback',
     'Try MEGA directly',
     'Report issue',
-    'Download fishished',
-    'Unknown error'
+    'Click here to finish download if it not starts automatically',
+    'Unknown error',
+    'Downloading $1 ($2 bytes)',
   ];
   
   var href = 'https://mega.nz' + (location.hash.length > 2 ? location.hash : ('#' + (location.search || '').substr(1)));
@@ -46,6 +47,7 @@
   function loadFallback() {
     var script = document.createElement('script');
     var file;
+    var attributes;
     script.src = 'mega.js';
     script.onload = function() {
       file = mega.file(href);
@@ -53,10 +55,14 @@
     };
     
     function afterLoadAttributes(err, data) {
+      attributes = data;
       if (err) {
         showMessage(messages[7]);
         throw err;
       }
+      showMessage(messages[8]
+        .replace('$1', attributes.name)
+        .replace('$2', attributes.size), true);
       file.download(afterDownload);
     }
     
@@ -68,8 +74,10 @@
       var anchor = document.createElement('a');
       anchor.textContent = messages[6];
       anchor.href = URL.createObjectURL(new Blob(data));
+      anchor.download = attributes.name;
       showMessage('', true);
       output.appendChild(anchor);
+      anchor.click();
     }
     
     document.head.appendChild(script)
