@@ -47,7 +47,7 @@ l._processShimQueue(window._rollbarShimQueue||[]);window[k]=l;window._rollbarIni
     navigator.serviceWorker.register('sw.min.js', {scope: '.'})
     .then(navigator.serviceWorker.ready)
     .then(function afterReady(instance){
-      if (!instance.active) {
+      if (!instance.active || location.search.length > 2) {
         location.reload();
         return;
       }
