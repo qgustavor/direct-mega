@@ -12,7 +12,7 @@
     'Unknown error'
   ];
   
-  var href = 'https://mega.nz' + location.hash;
+  var href = 'https://mega.nz' + (location.hash.length > 2 ? location.hash : ('#' + (location.search || '').substr(1)));
 
   if (!navigator.serviceWorker) {
     showMessage(messages[0], true);
