@@ -1,17 +1,18 @@
 <!doctype html> <!-- Required by the specification -->
-<html><meta charset=utf-8> <!-- Many problems without this (security, presentation, etc) -->
+<html lang=pt-BR> <!-- Without <html lang="..."> screen readers need to guess language -->
+<meta charset=utf-8> <!-- Many problems without this (security, presentation, etc) -->
 <title>Direct MEGA</title> <!-- Required by the specification -->
 <meta name=viewport content="width=device-width,initial-scale=1"> <!-- To work in mobile -->
 <meta content=yes name=mobile-web-app-capable> <!-- To allow be installed as a webapp -->
-<style> body{text-align: center; color: #444; background: #F4F4F4; margin: 3em} </style>
+<style>body {text-align: center;} </style>
 <noscript>Both MEGA and this page requires JavaScript enabled</noscript>
-<div id="output">Installing Direct MEGA (it happens just one time)</div>
+<div id="output"><strong>Wait!</strong> Installing Direct MEGA (it happens just one time)</div>
 <script>
   (function () {
     // For future translation
     var messages = [
       'Incompatible browser, wait for updates',
-      'No file defined',
+      'No file defined :/',
       'After the download starts you can now close this window.',
       'Unknown error, wait for updates',
       'Try MEGA directly',
@@ -28,7 +29,7 @@
     navigator.serviceWorker.register('sw.min.js', {scope: '.'})
     .then(navigator.serviceWorker.ready)
     .then(function afterReady(instance){
-      if (!instance.active || location.search.length > 2) {
+      if (!instance.active) {
         location.reload();
         return;
       }
@@ -42,7 +43,8 @@
         location.href = './?' + data.identifier;
         showMessage(messages[2], true);
       });
-    }, function () {
+    }, function (error) {
+      console.error(error);
       showMessage(messages[3]);
     });
     
