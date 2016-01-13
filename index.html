@@ -7,25 +7,6 @@
 <noscript>Both MEGA and this page requires JavaScript enabled</noscript>
 <div id="output"><strong>Wait!</strong> Installing Direct MEGA</div>
 <script>
-/// ERROR REPORTING ///
-var _rollbarConfig = {
-    accessToken: "e7dce51c0e174102bad8179a5c5680ac",
-    captureUncaught: true,
-    payload: {
-        environment: "test"
-    }
-};
-
-!function(e){function d(g){if(c[g])return c[g].exports;var h=c[g]={exports:{},id:g,loaded:!1};return e[g].call(h.exports,h,h.exports,d),h.loaded=!0,h.exports}var c={};return d.m=e,d.c=c,d.p="",d(0)}([function(e,d,c){e=c(1).Rollbar;c=c(2);_rollbarConfig.rollbarJsUrl=_rollbarConfig.rollbarJsUrl||"https://d37gvrvc0wt4s1.cloudfront.net/js/v1.7/rollbar.min.js";e=e.init(window,_rollbarConfig);c=c(e,_rollbarConfig);e.loadFull(window,document,!1,_rollbarConfig,c)},function(e,d,c){function g(a){this.shimId=
-++n;this.notifier=null;this.parentShim=a;this.logger=function(){};window.console&&void 0===window.console.shimId&&(this.logger=window.console.log)}function h(a,b,f){window._rollbarWrappedError&&(f[4]||(f[4]=window._rollbarWrappedError),f[5]||(f[5]=window._rollbarWrappedError._rollbarContext),window._rollbarWrappedError=null);a.uncaughtError.apply(a,f);b&&b.apply(window,f)}function p(a){return k(function(){if(this.notifier)return this.notifier[a].apply(this.notifier,arguments);var b=this,f="scope"===
-a;f&&(b=new g(this));var c=Array.prototype.slice.call(arguments,0);return window._rollbarShimQueue.push({shim:b,method:a,args:c,ts:new Date}),f?b:void 0})}function l(a,b){if(b.hasOwnProperty&&b.hasOwnProperty("addEventListener")){var f=b.addEventListener;b.addEventListener=function(b,c,g){f.call(this,b,a.wrap(c),g)};var c=b.removeEventListener;b.removeEventListener=function(a,b,f){c.call(this,a,b&&b._wrapped?b._wrapped:b,f)}}}function k(a,b){return b=b||window.console.log||function(){},function(){try{return a.apply(this,
-arguments)}catch(f){b("Rollbar internal error:",f)}}}var n=0;g.init=function(a,b){var f=b.globalAlias||"Rollbar";if("object"==typeof a[f])return a[f];a._rollbarShimQueue=[];a._rollbarWrappedError=null;b=b||{};var c=new g;return k(function(){if(c.configure(b),b.captureUncaught){var g=a.onerror;a.onerror=function(){var a=Array.prototype.slice.call(arguments,0);h(c,g,a)};var e,d,m="EventTarget Window Node ApplicationCache AudioTrackList ChannelMergerNode CryptoOperation EventSource FileReader HTMLUnknownElement IDBDatabase IDBRequest IDBTransaction KeyOperation MediaController MessagePort ModalWindow Notification SVGElementInstance Screen TextTrack TextTrackCue TextTrackList WebSocket WebSocketWorker Worker XMLHttpRequest XMLHttpRequestEventTarget XMLHttpRequestUpload".split(" ");
-for(e=0;e<m.length;++e)d=m[e],a[d]&&a[d].prototype&&l(c,a[d].prototype)}return a[f]=c,c},c.logger)()};g.prototype.loadFull=function(a,b,c,g,e){var d=k(function(){var a=b.createElement("script"),d=b.getElementsByTagName("script")[0];a.src=g.rollbarJsUrl;a.async=!c;a.onload=h;d.parentNode.insertBefore(a,d)},this.logger),h=k(function(){var b;if(void 0===a._rollbarPayloadQueue){var c,d,f;for(b=Error("rollbar.js did not load");c=a._rollbarShimQueue.shift();)for(c=c.args,f=0;f<c.length;++f)if(d=c[f],"function"==
-typeof d){d(b);break}}"function"==typeof e&&e(b)},this.logger);k(function(){c?d():a.addEventListener?a.addEventListener("load",d,!1):a.attachEvent("onload",d)},this.logger)()};g.prototype.wrap=function(a,b){try{var c;if((c="function"==typeof b?b:function(){return b||{}},"function"!=typeof a)||a._isWrap)return a;if(!a._wrapped){a._wrapped=function(){try{return a.apply(this,arguments)}catch(b){throw b._rollbarContext=c()||{},b._rollbarContext._wrappedSource=a.toString(),window._rollbarWrappedError=
-b,b;}};a._wrapped._isWrap=!0;for(var d in a)a.hasOwnProperty(d)&&(a._wrapped[d]=a[d])}return a._wrapped}catch(g){return a}};d="log debug info warn warning error critical global configure scope uncaughtError".split(" ");for(c=0;c<d.length;++c)g.prototype[d[c]]=p(d[c]);e.exports={Rollbar:g,_rollbarWindowOnError:h}},function(e,d,c){e.exports=function(c,d){return function(e){if(!e&&!window._rollbarInitialized){e=window.RollbarNotifier;var l=d||{},k=l.globalAlias||"Rollbar",l=window.Rollbar.init(l,c);
-l._processShimQueue(window._rollbarShimQueue||[]);window[k]=l;window._rollbarInitialized=!0;e.processPayloads()}}}}]);
-/// ERROR REPORTING ///
-
   (function () {
     // For future translation
     var messages = [
