@@ -3,7 +3,17 @@
 <title>Direct MEGA</title> <!-- Required by the specification -->
 <meta name=viewport content="width=device-width,initial-scale=1"> <!-- To work in mobile -->
 <meta content=yes name=mobile-web-app-capable> <!-- To allow be installed as a webapp -->
-<style> body{text-align: center; margin: 3em; color: #444; background: #F4F4F4;} </style>
+<style>body{font:2em sans-serif;text-align:center;color:#444;background:#F0F0F0;
+display:flex;justify-content:center;align-items:center;height:100vh;margin:0}
+/* fallback download interface */
+.downloader{display:none}.downloader.active{display:block}
+.downloading-progress{position:relative;float:left;width:89%;height:20px;
+background-color:#CCCCCC;padding:1%;box-sizing:border-box;border-radius:2em;}
+.downloading-progress-bar{position:relative;width:0%;height:10px;border-radius:2em;background-color:#FFF;}
+.percentage{background-color:#D9290B;border-radius:2em;height:20px;box-sizing:border-box;width:10%;
+color:#FFF;font-size:0.8em;text-align:center;float:left;line-height:20px;margin:0 0 0 1%;}</style>
 <noscript>Both MEGA and this page requires JavaScript enabled</noscript>
 <div id="output"><strong>Wait!</strong> Installing Direct MEGA</div>
+<div class="downloader"><div class="downloading-progress"><div class="downloading-progress-bar"></div></div>
+<div class="percentage"></div></div>
 <script src="main.js"></script>

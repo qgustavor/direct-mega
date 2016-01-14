@@ -70,7 +70,27 @@
       showMessage(messages[8]
         .replace('$1', attributes.name)
         .replace('$2', humanizeSize(attributes.size)), true);
-      file.download(afterDownload);
+        
+      handleProgress(file.download(afterDownload), attributes.size);
+    }
+    
+    function handleProgress(stream, total) {
+      var offset = 0;
+      var percentageBar = document.getElementsByClassName('downloading-progress-bar');
+      var percentageText = document.getElementsByClassName('percentage');
+      document.getElementsByClassName('downloader').className += ' active';
+      
+      percentageText.textContent = '0%';
+      
+      stream.on('data', function (data) {
+        offset += data.length;
+        percentageText.textContent = Math.floor(data * 100 / total) + '%';
+        percentageBar.style.width = (data * 100 / total).toFixed(2) + '%';
+      });
+      
+      stream.on('end', function () {
+        percentageText.textContent = percentageBar.style.width = '100%';
+      });
     }
     
     function afterDownload(err, data) {
