@@ -84,8 +84,8 @@
       
       stream.on('data', function (data) {
         offset += data.length;
-        percentageText.textContent = Math.floor(data * 100 / total) + '%';
-        percentageBar.style.width = (data * 100 / total).toFixed(2) + '%';
+        percentageText.textContent = Math.floor(offset * 100 / total) + '%';
+        percentageBar.style.width = (offset * 100 / total).toFixed(2) + '%';
       });
       
       stream.on('end', function () {
