@@ -2,20 +2,26 @@
   var output = document.getElementById('output');
   // For future translation
   var messages = [
-    'Incompatible browser, loading fallback',
-    'No file defined :/',
+    "This browser don't support direct downloads. Using fallback method...",
+    'Direct MEGA installed, but no file to download.',
     'After the download starts you can now close this window.',
     'Unknown error, loading fallback',
     'Try MEGA directly',
     'Report issue',
     'Click here to finish download if it not starts automatically',
     'Unknown error',
-    'Downloading $1 ($2)',
+    "Downloading $1 ($2) - don't close this page",
+    'Direct MEGA installed, download will start soon.',
+    'No file to download.',
   ];
   
   var href = 'https://mega.nz' + (location.hash.length > 2 ? location.hash : ('#' + (location.search || '').substr(1)));
 
   if (!navigator.serviceWorker) {
+    if (href.length <= 16) {
+      showMessage(messages[10], true);
+      return;
+    }
     showMessage(messages[0], true);
     loadFallback();
     return;
@@ -24,6 +30,7 @@
   navigator.serviceWorker.register('sw.min.js', {scope: '.'})
   .then(navigator.serviceWorker.ready)
   .then(function afterReady(instance){
+    showMessage(messages[9], true);
     if (!instance.active || location.search.length > 2) {
       location.reload();
       return;
