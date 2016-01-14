@@ -73,7 +73,9 @@
       }
       var anchor = document.createElement('a');
       anchor.textContent = messages[6];
-      anchor.href = URL.createObjectURL(new Blob(new Uint8Array(data /* is Buffer */)));
+      
+      // data is Uint8Array
+      anchor.href = URL.createObjectURL(new Blob([data.buffer], { type: 'application/octet-stream' }));
       anchor.download = attributes.name;
       showMessage('', true);
       output.appendChild(anchor);
