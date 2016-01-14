@@ -76,9 +76,9 @@
     
     function handleProgress(stream, total) {
       var offset = 0;
-      var percentageBar = document.getElementsByClassName('downloading-progress-bar');
-      var percentageText = document.getElementsByClassName('percentage');
-      document.getElementsByClassName('downloader').className += ' active';
+      var percentageBar = document.getElementsByClassName('downloading-progress-bar')[0];
+      var percentageText = document.getElementsByClassName('percentage')[0];
+      document.getElementsByClassName('downloader')[0].className += ' active';
       
       percentageText.textContent = '0%';
       
