@@ -6,7 +6,7 @@
     'Direct MEGA installed, but no file to download.',
     'After the download starts you can now close this window.',
     'Unknown error, loading fallback',
-    'Try MEGA directly',
+    'Try the original',
     'Report issue',
     'Click here to finish download if it not starts automatically',
     'Unknown error',
