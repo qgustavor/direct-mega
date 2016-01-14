@@ -10,7 +10,7 @@
     'Report issue',
     'Click here to finish download if it not starts automatically',
     'Unknown error',
-    'Downloading $1 ($2 bytes)',
+    'Downloading $1 ($2)',
   ];
   
   var href = 'https://mega.nz' + (location.hash.length > 2 ? location.hash : ('#' + (location.search || '').substr(1)));
@@ -62,7 +62,7 @@
       }
       showMessage(messages[8]
         .replace('$1', attributes.name)
-        .replace('$2', attributes.size), true);
+        .replace('$2', humanizeSize(attributes.size)), true);
       file.download(afterDownload);
     }
     
@@ -73,7 +73,7 @@
       }
       var anchor = document.createElement('a');
       anchor.textContent = messages[6];
-      anchor.href = URL.createObjectURL(new Blob(data));
+      anchor.href = URL.createObjectURL(new Blob(new Uint8Array(data /* is Buffer */)));
       anchor.download = attributes.name;
       showMessage('', true);
       output.appendChild(anchor);
@@ -81,6 +81,10 @@
     }
     
     document.head.appendChild(script)
+  }
+  
+  function humanizeSize(a,b,c,d,e) { // http://stackoverflow.com/a/20463021
+    return (b = Math, c = b.log, d = 1024, e = c(a)/c(d)|0, a/b.pow(d,e)).toFixed(2)+' '+(e?'KMGTPEZY'[--e]+'B':'bytes');
   }
   
   function showMessage(message, noError) {
