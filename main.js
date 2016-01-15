@@ -8,7 +8,7 @@
     'Unknown error, loading fallback',
     'Try the original',
     'Report issue',
-    'Click here to finish download if it not starts automatically',
+    'Click here to download if it not starts automatically',
     'Unknown error',
     "Downloading $1 ($2) - don't close this page",
     'Direct MEGA installed, download will start soon.',
