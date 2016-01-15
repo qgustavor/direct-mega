@@ -4,7 +4,7 @@
   var messages = [
     "This browser don't support direct downloads. Using fallback method...",
     'Direct MEGA installed, but no file to download.',
-    'After the download starts you can now close this window.',
+    'After the download starts you can close this window.',
     'Unknown error, loading fallback',
     'Try the original',
     'Report issue',
