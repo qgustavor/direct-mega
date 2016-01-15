@@ -2,16 +2,16 @@
   var output = document.getElementById('output');
   // For future translation
   var messages = [
-    "This browser don't support direct downloads. Using fallback method...",
+    "Cannot use browser download manager. Using alternative download manager.",
     'Direct MEGA installed, but no file to download.',
     'After the download starts you can close this window.',
-    'Unknown error, loading fallback',
+    'Unknown error. Using alternative download manager.',
     'Try the original',
     'Report issue',
     'Click here to download if it not starts automatically',
     'Unknown error',
     "Downloading $1 ($2) - don't close this page",
-    'Direct MEGA installed, download will start soon.',
+    'Your download will start soon...',
     'No file to download.',
   ];
   
