@@ -87,17 +87,15 @@
     }
     
     function handleProgress(stream, total) {
-      var offset = 0;
       var percentageBar = document.getElementsByClassName('downloading-progress-bar')[0];
       var percentageText = document.getElementsByClassName('percentage')[0];
       document.getElementsByClassName('downloader')[0].className += ' active';
       
       percentageText.textContent = '0%';
       
-      stream.on('data', function (data) {
-        offset += data.length;
-        percentageText.textContent = Math.floor(offset * 100 / total) + '%';
-        percentageBar.style.width = (offset * 100 / total).toFixed(2) + '%';
+      stream.on('progress', function (data) {
+        percentageText.textContent = Math.floor(data.bytesLoaded * 100 / total) + '%';
+        percentageBar.style.width = (data.bytesLoaded * 100 / total).toFixed(2) + '%';
       });
       
       stream.on('end', function () {
