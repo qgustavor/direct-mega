@@ -31,7 +31,7 @@
   navigator.serviceWorker.register('sw.min.js', {scope: '.'})
   .then(navigator.serviceWorker.ready)
   .then(function afterReady(instance){
-    if (location.hash.length <= 1) {
+    if (identifier.length < 4) {
       showMessage(messages[1], true);
       return;
     }
