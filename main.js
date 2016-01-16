@@ -15,10 +15,11 @@
     'No file to download.',
   ];
   
-  var href = 'https://mega.nz' + (location.hash.length > 2 ? location.hash : ('#' + (location.search || '').substr(1)));
+  var identifier = (location.hash.length > 2 ? location.hash : location.search || '').substr(1);
+  var href = 'https://mega.nz/#' + identifier;
 
   if (!navigator.serviceWorker) {
-    if (href.length <= 16) {
+    if (identifier.length < 4) {
       showMessage(messages[10], true);
       return;
     }
@@ -30,21 +31,32 @@
   navigator.serviceWorker.register('sw.min.js', {scope: '.'})
   .then(navigator.serviceWorker.ready)
   .then(function afterReady(instance){
-    showMessage(messages[9], true);
-    if (!instance.active || location.search.length > 2) {
-      location.reload();
-      return;
-    }
-    
     if (location.hash.length <= 1) {
       showMessage(messages[1], true);
       return;
     }
     
-    sendMessage(instance.active, href).then(function (data) {
-      location.href = './?' + data.identifier;
+    if (top !== self) {
+      top.postMessage('', 'https://directme.ga');
+      return;
+    }
+
+    showMessage(messages[9], true);
+    
+    var downloadFrame = document.createElement('iframe');
+    downloadFrame.src = '?' + identifier;
+    downloadFrame.style.cssText = 'position:absolute;width:1px;height:1px;padding:0;' +
+      'margin:-1px;overflow:hidden;clip:rect(0,0,0,0);border:0';
+    downloadFrame.addEventListener('load', function() {
       showMessage(messages[2], true);
     });
+    window.addEventListener('message', function(event) {
+      if (event.origin !== 'https://directme.ga') return;
+      showMessage(messages[3], true);
+      loadFallback();
+    });
+    
+    document.body.appendChild(downloadFrame);
   }, function (error) {
     console.error(error);
     showMessage(messages[3], true);
@@ -132,21 +144,5 @@
     anchor.textContent = messages[5];
     anchor.href = 'https://github.com/qgustavor/direct-mega/issues/new';
     output.appendChild(anchor);
-  }
-  
-  // https://googlechrome.github.io/samples/service-worker/post-message/
-  function sendMessage(instance, message) {
-    return new Promise(function(resolve, reject) {
-      var messageChannel = new MessageChannel();
-      messageChannel.port1.onmessage = function(event) {
-        if (event.data.error) {
-          reject(event.data.error);
-        } else {
-          resolve(event.data);
-        }
-      };
-      
-      instance.postMessage(message, [messageChannel.port2]);
-    });
   }
 }());
