@@ -114,7 +114,7 @@
       anchor.textContent = messages[6];
       
       // data is Uint8Array
-      anchor.href = URL.createObjectURL(new Blob([data.buffer], { type: 'application/octet-stream' }));
+      anchor.href = URL.createObjectURL(new Blob([data.buffer || data], { type: 'application/octet-stream' }));
       anchor.download = attributes.name;
       showMessage('', true);
       output.appendChild(anchor);
