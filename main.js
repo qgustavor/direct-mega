@@ -47,9 +47,9 @@
     downloadFrame.src = '?' + identifier;
     downloadFrame.style.cssText = 'position:absolute;width:1px;height:1px;padding:0;' +
       'margin:-1px;overflow:hidden;clip:rect(0,0,0,0);border:0';
-    downloadFrame.addEventListener('load', function() {
+    setTimeout(function() {
       showMessage(messages[2], true);
-    });
+    }, 8000);
     window.addEventListener('message', function(event) {
       if (event.origin !== 'https://directme.ga') return;
       showMessage(messages[3], true);
