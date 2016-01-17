@@ -30,14 +30,15 @@
   
   navigator.serviceWorker.register('sw.min.js', {scope: '.'})
   .then(navigator.serviceWorker.ready)
-  .then(function afterReady(instance){
+  .then(function (instance){
     if (identifier.length < 4) {
       showMessage(messages[1], true);
       return;
     }
     
-    if (top !== self) {
-      top.postMessage('', 'https://directme.ga');
+    if (parent !== self && // is in a iframe and is the iframe created below
+       parent.location.origin === location.origin) {
+      top.postMessage('', location.origin);
       return;
     }
 
@@ -47,11 +48,13 @@
     downloadFrame.src = '?' + identifier;
     downloadFrame.style.cssText = 'position:absolute;width:1px;height:1px;padding:0;' +
       'margin:-1px;overflow:hidden;clip:rect(0,0,0,0);border:0';
-    setTimeout(function() {
+    
+    var canCloseTimeout = setTimeout(function() {
       showMessage(messages[2], true);
     }, 8000);
     window.addEventListener('message', function(event) {
-      if (event.origin !== 'https://directme.ga') return;
+      if (event.origin !== location.origin) return;
+      clearTimeout(canCloseTimeout);
       showMessage(messages[3], true);
       loadFallback();
     });
