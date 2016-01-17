@@ -29,6 +29,7 @@
   }
   
   navigator.serviceWorker.register('sw.min.js', {scope: '.'})
+  .then(wait(2000))
   .then(navigator.serviceWorker.ready)
   .then(function (instance){
     if (identifier.length < 4) {
@@ -65,6 +66,12 @@
     showMessage(messages[3], true);
     loadFallback();
   });
+  
+  function wait(time) {
+    return new Promise(function(resolve) {
+      setTimeout(resolve, time);
+    });
+  }
   
   function loadFallback() {
     var script = document.createElement('script');
