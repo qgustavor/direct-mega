@@ -36,13 +36,20 @@
       return;
     }
     
-    if (instance.active && instance.active.state === 'activating') {
-      location.reload();
-      return;
-    }
+    var isDownloadIframe = false;
+    try {
+      isDownloadIframe = parent !== self && // is in a iframe and is the iframe created below
+      parent.location.origin === location.origin;
+    } catch(e) {}
     
-    if (parent !== self && // is in a iframe and is the iframe created below
-       parent.location.origin === location.origin) {
+    if (isDownloadIframe) {
+      if (instance.active && instance.active.state === 'activating') {
+        setTimeout(function () {
+          location.reload();
+        }, 500);
+        return;
+      }
+      
       top.postMessage('', location.origin);
       return;
     }
