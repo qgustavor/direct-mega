@@ -112,7 +112,9 @@
         handleProgress(file.download(afterDownload), attributes.size);
       } else {
         file.appendTo(document.body, function (error, element) {
-          if (!error) {
+          if (error) {
+            handleProgress(file.download(afterDownload), attributes.size);
+          } else {
             element.style.cssText = 'position:absolute;top:0;left:0;right:0;bottom:0;border:0;width:100%;height:100%;';
           }
         });
