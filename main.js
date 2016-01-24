@@ -13,6 +13,7 @@
     "Downloading $1 ($2) - don't close this page",
     'Your download will start soon...',
     'No file to download.',
+    'File conversion require updated browsers'
   ];
   
   var identifier = (location.hash.length > 2 ? location.hash : location.search || '').substr(1);
@@ -62,7 +63,11 @@
       'margin:-1px;overflow:hidden;clip:rect(0,0,0,0);border:0';
     
     var canCloseTimeout = setTimeout(function() {
-      showMessage(messages[2], true);
+      if (identifier.indexOf('!no-download') === -1 && identifier.indexOf('!as-') === -1) {
+        showMessage(messages[2], true);
+      } else {
+        downloadFrame.style.cssText = 'position:absolute;top:0;left:0;right:0;bottom:0;border:0;width:100%;height:100%;';
+      }
     }, 8000);
     window.addEventListener('message', function(event) {
       if (event.origin !== location.origin) return;
@@ -79,6 +84,10 @@
   });
   
   function loadFallback() {
+    if (identifier.indexOf('!as-') !== -1) {
+      showMessage(messages[11]);
+      return;
+    }
     var script = document.createElement('script');
     var file;
     var attributes;
@@ -97,8 +106,17 @@
       showMessage(messages[8]
         .replace('$1', attributes.name)
         .replace('$2', humanizeSize(attributes.size)), true);
-        
-      handleProgress(file.download(afterDownload), attributes.size);
+      
+      
+      if (identifier.indexOf('!no-download') === -1) {
+        handleProgress(file.download(afterDownload), attributes.size);
+      } else {
+        file.appendTo(document.body, function (error, element) {
+          if (!error) {
+            element.style.cssText = 'position:absolute;top:0;left:0;right:0;bottom:0;border:0;width:100%;height:100%;';
+          }
+        });
+      }
     }
     
     function handleProgress(stream, total) {
