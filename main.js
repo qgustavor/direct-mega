@@ -84,10 +84,6 @@
   });
   
   function loadFallback() {
-    if (identifier.indexOf('!as-') !== -1) {
-      showMessage(messages[11]);
-      return;
-    }
     var script = document.createElement('script');
     var file;
     var attributes;
