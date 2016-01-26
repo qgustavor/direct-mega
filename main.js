@@ -12,8 +12,7 @@
     'Unknown error',
     "Downloading $1 ($2) - don't close this page",
     'Your download will start soon...',
-    'No file to download.',
-    'File conversion require updated browsers'
+    'No file to download.'
   ];
   
   var identifier = (location.hash.length > 2 ? location.hash : location.search || '').substr(1);
@@ -63,10 +62,10 @@
       'margin:-1px;overflow:hidden;clip:rect(0,0,0,0);border:0';
     
     var canCloseTimeout = setTimeout(function() {
-      if (identifier.indexOf('!no-download') === -1 && identifier.indexOf('!as-') === -1) {
-        showMessage(messages[2], true);
-      } else {
+      if (identifier.indexOf('!download') === -1) {
         downloadFrame.style.cssText = 'position:absolute;top:0;left:0;right:0;bottom:0;border:0;width:100%;height:100%;';
+      } else {
+        showMessage(messages[2], true);
       }
     }, 8000);
     window.addEventListener('message', function(event) {
@@ -104,7 +103,7 @@
         .replace('$2', humanizeSize(attributes.size)), true);
       
       
-      if (identifier.indexOf('!no-download') === -1) {
+      if (identifier.indexOf('!download') !== -1) {
         handleProgress(file.download(afterDownload), attributes.size);
       } else {
         file.appendTo(document.body, function (error, element) {
