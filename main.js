@@ -12,7 +12,7 @@
     'Unknown error',
     "Downloading $1 ($2) - don't close this page",
     'Your download will start soon...',
-    'No file to download.'
+    'No file to download.',
   ];
   
   var identifier = (location.hash.length > 2 ? location.hash : location.search || '').substr(1);
@@ -62,11 +62,7 @@
       'margin:-1px;overflow:hidden;clip:rect(0,0,0,0);border:0';
     
     var canCloseTimeout = setTimeout(function() {
-      if (identifier.indexOf('!download') === -1) {
-        downloadFrame.style.cssText = 'position:absolute;top:0;left:0;right:0;bottom:0;border:0;width:100%;height:100%;';
-      } else {
-        showMessage(messages[2], true);
-      }
+      showMessage(messages[2], true);
     }, 8000);
     window.addEventListener('message', function(event) {
       if (event.origin !== location.origin) return;
@@ -101,19 +97,8 @@
       showMessage(messages[8]
         .replace('$1', attributes.name)
         .replace('$2', humanizeSize(attributes.size)), true);
-      
-      
-      if (identifier.indexOf('!download') !== -1) {
-        handleProgress(file.download(afterDownload), attributes.size);
-      } else {
-        file.appendTo(document.body, function (error, element) {
-          if (error) {
-            handleProgress(file.download(afterDownload), attributes.size);
-          } else {
-            element.style.cssText = 'position:absolute;top:0;left:0;right:0;bottom:0;border:0;width:100%;height:100%;';
-          }
-        });
-      }
+        
+      handleProgress(file.download(afterDownload), attributes.size);
     }
     
     function handleProgress(stream, total) {
