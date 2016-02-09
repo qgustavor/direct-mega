@@ -4,7 +4,8 @@ MEGA downloads working like normal downloads!
 ## How to use:
 
 When downloading a file replace `https://mega.nz` with `https://directme.ga`. For
-improved usability you can also replace the `#` with an `?`.
+improved usability (or in case you're being redirected to this file) you can
+replace the `#` with an `?`.
 
 Everything works in your computer and you can download anything directy from MEGA
 without your precious data touching any server (beside MEGA ones, of course).
