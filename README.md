@@ -17,4 +17,6 @@ without your precious data touching any server (beside MEGA ones, of course).
 
 Note: it don't work for folders because is quite hard to download folders.
 
-Depends on Service Workers and Streams API ([Chrome Status](https://www.chromestatus.com/feature/4531143755956224)).
+Normal downloading (the one from the image) depends on Service Workers and Streams API ([Chrome Status](https://www.chromestatus.com/feature/4531143755956224)).
+Browsers that don't support it will use a fallback download method similar to the one MEGA uses,
+but without asking if the user really wants to download the file.
