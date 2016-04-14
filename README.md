@@ -5,8 +5,6 @@ MEGA downloads working like normal downloads!
 
 [Download the file above](https://directme.ga/?!MAsFwa4b!d8o1uz6SffMAATSQmERLIYITkyc-eTbKQ6xqI3IQSms) ~~or [watch it direcly](https://directme.ga/?!MAsFwa4b!d8o1uz6SffMAATSQmERLIYITkyc-eTbKQ6xqI3IQSms!view)~~.
 
-**Warning:** Not compatible with Firefox with Service Workers enabled because its implementation is bugged. [Related issue](https://github.com/qgustavor/direct-mega/issues/2).
-
 ## How to use:
 
 When downloading a file replace `https://mega.nz` with `https://directme.ga`. For
