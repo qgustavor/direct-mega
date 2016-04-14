@@ -17,8 +17,19 @@
   
   var identifier = (location.hash.length > 2 ? location.hash : location.search || '').substr(1);
   var href = 'https://mega.nz/#' + identifier;
+  
+  var hasSupport = navigator.serviceWorker && window.ReadableStream && (function () {
+    try {
+      // Some old Chrome versions implement ReadableStream,
+      // but it cannot be created.
+      new ReadableStream();
+    } catch (e) {
+      return false;
+    }
+    return true;
+  }());
 
-  if (!navigator.serviceWorker) {
+  if (!hasSupport) {
     if (identifier.length < 4) {
       showMessage(messages[10], true);
       return;
