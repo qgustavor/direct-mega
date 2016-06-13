@@ -6,7 +6,6 @@
 
 import mega from 'mega'
 import {parse} from 'url'
-import {contentType} from 'mime-types'
 
 self.addEventListener('install', function (event) {
   // Try to make an stream, if it fails the SW don't install
@@ -28,15 +27,9 @@ self.addEventListener('fetch', function(event) {
     file.loadAttributes((err, attr) => {
       if (err) return reject(err);
       
-      let headers = {
-        'Content-Type': contentType(attr.name)
-      };
-      
-      let convert = false;
-      if (identifier.indexOf('!view') === -1) {
-        headers['Content-Disposition'] = 'attachment; filename=' + attr.name;
-        headers['Content-Type'] = 'application/octet-stream; charset=utf-8';
-      }
+      const headers = {};
+      headers['Content-Disposition'] = 'attachment; filename=' + attr.name;
+      headers['Content-Type'] = 'application/octet-stream; charset=utf-8';
       headers['Content-Length'] = attr.size;
     
       const stream = file.download();
