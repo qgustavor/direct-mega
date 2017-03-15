@@ -1,3 +1,4 @@
+import globals from 'rollup-plugin-node-globals'
 import builtins from 'rollup-plugin-node-builtins'
 import resolve from 'rollup-plugin-node-resolve'
 import commonjs from 'rollup-plugin-commonjs'
@@ -8,6 +9,7 @@ export default {
   entry: 'src/fallback.js',
   format: 'iife',
   plugins: [
+    globals(),
     builtins(),
     resolve({
       jsnext: true,
