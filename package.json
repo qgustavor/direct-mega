@@ -3,12 +3,11 @@
   "version": "1.0.0",
   "description": "MEGA + ServiceWorkers = Direct MEGA",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
+    "test": "standard",
     "build": "npm run build:sw && npm run build:fallback",
     "build:sw": "rollup --config rollup.sw.js",
     "build:fallback": "rollup --config rollup.fallback.js",
-    "deploy": "gh-pages -d dist",
-    "test": "standard"
+    "deploy": "gh-pages -d dist"
   },
   "repository": {
     "type": "git",
@@ -31,6 +30,7 @@
     "rollup": "^0.41.5",
     "rollup-plugin-babel": "^2.7.1",
     "rollup-plugin-commonjs": "^8.0.2",
+    "rollup-plugin-json": "^2.1.0",
     "rollup-plugin-node-builtins": "^2.1.0",
     "rollup-plugin-node-globals": "^1.1.0",
     "rollup-plugin-node-resolve": "^2.0.0",
