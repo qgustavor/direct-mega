@@ -50,7 +50,7 @@ function fetchHandler (event) {
 
         const response = new self.Response(folderContent, { headers: {
           'Content-Type': 'text/html',
-          'Content-Security-Policy', 'sandbox'
+          'Content-Security-Policy': 'sandbox'
         }})
         resolve(response)
         return
