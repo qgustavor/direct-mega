@@ -1,8 +1,17 @@
 /* eslint-env serviceworker */
 
 import { File } from 'megajs/dist/main.browser-es.js'
+import escapeHTML from 'escape-html'
+import mime from 'mime-types'
 
 self.addEventListener('install', function (event) {
+  if (event.registerForeignFetch) {
+    event.registerForeignFetch({
+      scopes: [self.registration.scope],
+      origins: ['*']
+    })
+  }
+
   // Try to make an stream, if it fails the SW will not install
   const stream = new self.ReadableStream()
   event.waitUntil(stream && self.skipWaiting())
@@ -12,8 +21,15 @@ self.addEventListener('activate', function (event) {
   event.waitUntil(self.clients.claim())
 })
 
-self.addEventListener('fetch', function (event) {
-  const identifier = (new self.URL(event.request.url).search || '').substr(1)
+// A page on GitHub Pages? We don't have any credentials!
+// So we will not spend a single line doing the noCredentialsRequest trick!
+self.addEventListener('foreignfetch', fetchHandler)
+self.addEventListener('fetch', fetchHandler)
+
+function fetchHandler (event) {
+  const requestURL = event.request.url
+  const parsedURL = new self.URL(requestURL)
+  const identifier = (parsedURL.search || '').substr(1)
   const requiredFile = identifier.charAt(0) === '!'
     ? `https://mega.nz/#${identifier}` : null
 
@@ -22,10 +38,34 @@ self.addEventListener('fetch', function (event) {
     file.loadAttributes((err, file) => {
       if (err) return reject(err)
 
+      if (file.folder) {
+        const folderContent = `<!DOCTYPE html><meta charset="utf-8">
+        <title>"${ escapeHTML(file.name) }" folder contents</title>
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <style>body{margin:20px;line-height:1.6;font-size:18px;color:#444;padding:0 10px}h1,h2,h3{line-height:1.2}</style>
+        <h1>"${ escapeHTML(file.name) }" folder contents</h1>
+        <ul>${ file.children.map(file => {
+          return `<li><a href="${ escapeHTML(requestURL + '!' + file.handle) }">${ escapeHTML(file.name) }</a></li>`
+        }).join('') }</ul>`
+
+        const response = new self.Response(folderContent, { headers: {
+          'Content-Type': 'text/html',
+          'Content-Security-Policy', 'sandbox'
+        }})
+        resolve(response)
+        return
+      }
+
       const headers = {}
-      headers['Content-Disposition'] = 'attachment; filename=' + file.name
-      headers['Content-Type'] = 'application/octet-stream; charset=utf-8'
       headers['Content-Length'] = file.size
+
+      if (parsedURL.pathname === '/view') {
+        headers['Content-Security-Policy'] = 'sandbox'
+        headers['Content-Type'] = mime.contentType(file.name)
+      } else {
+        headers['Content-Disposition'] = 'attachment; filename=' + file.name
+        headers['Content-Type'] = 'application/octet-stream; charset=utf-8'
+      }
 
       const stream = file.download()
 
@@ -69,4 +109,4 @@ self.addEventListener('fetch', function (event) {
       {headers: { 'Content-Type': 'text/plain; charset=utf-8' }}
     )
   }))
-})
+}
