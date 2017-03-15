@@ -7,7 +7,8 @@
   installingMessage.textContent = 'Please wait...'
   document.body.appendChild(installingMessage)
 
-  var identifier = (location.hash.length > 2 ? location.hash : location.search || '').substr(1);
+  var location = window.location
+  var identifier = (location.hash.length > 2 ? location.hash : location.search || '').substr(1)
   var hasFile = identifier.length < 4
 
   if (navigator.serviceWorker && typeof ReadableStream === 'function') {

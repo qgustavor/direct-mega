@@ -1,5 +1,6 @@
 import { File } from 'megajs/dist/main.browser-es.js'
 
+const location = window.location
 const body = document.body
 let url = null
 
@@ -44,7 +45,9 @@ function afterLoadAttributes (error, file) {
     return
   }
 
-  const downloadStream = file.download(afterDownload)
+  const downloadStream = file.download((err, data) => {
+    afterDownload(err, data, file)
+  })
   handleProgress(downloadStream, file.size)
 }
 
@@ -53,15 +56,15 @@ function handleProgress (stream, total) {
   progressElement.textContent = '0%'
 
   stream.on('progress', function (data) {
-    percentageText.textContent = Math.floor(data.bytesLoaded * 100 / total) + '%'
+    progressElement.textContent = Math.floor(data.bytesLoaded * 100 / total) + '%'
   })
 
   stream.on('end', function () {
-    percentageText.textContent = '100%'
+    progressElement.textContent = '100%'
   })
 }
 
-function afterDownload(error, data) {
+function afterDownload (error, data, file) {
   if (error) {
     showError(error.message)
     return
@@ -74,8 +77,8 @@ function afterDownload(error, data) {
   paragraph.appendChild(document.createTextNode('If it dont starts'))
 
   const anchor = document.createElement('a')
-  anchor.href = URL.createObjectURL(new Blob([data.buffer || data], { type: 'application/octet-stream' }))
-  anchor.download = attributes.name
+  anchor.href = window.URL.createObjectURL(new window.Blob([data.buffer || data], { type: 'application/octet-stream' }))
+  anchor.download = file.name
   anchor.textContent = 'click here'
   paragraph.appendChild(anchor)
 

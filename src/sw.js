@@ -40,13 +40,13 @@ function fetchHandler (event) {
 
       if (file.folder) {
         const folderContent = `<!DOCTYPE html><meta charset="utf-8">
-        <title>"${ escapeHTML(file.name) }" folder contents</title>
+        <title>"${escapeHTML(file.name)}" folder contents</title>
         <meta name="viewport" content="width=device-width, initial-scale=1">
         <style>body{margin:20px;line-height:1.6;font-size:18px;color:#444;padding:0 10px}h1,h2,h3{line-height:1.2}</style>
-        <h1>"${ escapeHTML(file.name) }" folder contents</h1>
-        <ul>${ file.children.map(file => {
-          return `<li><a href="${ escapeHTML(requestURL + '!' + file.handle) }">${ escapeHTML(file.name) }</a></li>`
-        }).join('') }</ul>`
+        <h1>"${escapeHTML(file.name)}" folder contents</h1>
+        <ul>${file.children.map(file => {
+          return `<li><a href="${escapeHTML(requestURL + '!' + file.handle)}">${escapeHTML(file.name)}</a></li>`
+        }).join('')}</ul>`
 
         const response = new self.Response(folderContent, { headers: {
           'Content-Type': 'text/html',
