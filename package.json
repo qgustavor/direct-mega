@@ -1,0 +1,33 @@
+{
+  "name": "direct-mega",
+  "version": "1.0.0",
+  "description": "MEGA + ServiceWorkers = Direct MEGA",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "npm run build:sw && npm run build:fallback",
+    "build:sw": "rollup --config rollup.sw.js",
+    "build:fallback": "rollup --config rollup.fallback.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/qgustavor/direct-mega.git"
+  },
+  "author": "qgustavor (https://qgustavor.tk)",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/qgustavor/direct-mega/issues"
+  },
+  "homepage": "https://github.com/qgustavor/direct-mega#readme",
+  "private": true,
+  "devDependencies": {
+    "babel-plugin-external-helpers": "^6.22.0",
+    "babel-preset-latest": "^6.24.0",
+    "megajs": "^0.10.0",
+    "rollup": "^0.41.5",
+    "rollup-plugin-babel": "^2.7.1",
+    "rollup-plugin-commonjs": "^8.0.2",
+    "rollup-plugin-node-builtins": "^2.1.0",
+    "rollup-plugin-node-resolve": "^2.0.0",
+    "rollup-plugin-uglify": "^1.0.1"
+  }
+}
