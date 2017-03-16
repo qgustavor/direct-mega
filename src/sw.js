@@ -44,6 +44,7 @@ function fetchHandler (event) {
       if (err) return reject(err)
 
       if (file.children) {
+        const baseURL = parsedURL.origin + parsedURL.pathname + '?' + identifier.split('!').slice(0, 3).join('!')
         const folderContent = `<!DOCTYPE html><meta charset="utf-8">
 <title>"${escapeHTML(file.name)}" folder contents</title>
 <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -52,7 +53,7 @@ function fetchHandler (event) {
 <ul>${file.children.sort((left, right) => {
   return (left.name || '').localeCompare(right.name || '')
 }).map(file => {
-  return `<li><a href="${escapeHTML(requestURL + '!' + file.downloadId[1])}">${escapeHTML(file.name)}</a></li>`
+  return `<li><a href="${escapeHTML(baseURL + '!' + file.downloadId[1])}">${escapeHTML(file.name)}</a></li>`
 }).join('\n')}</ul>`
 
         const response = new self.Response(folderContent, { headers: {
