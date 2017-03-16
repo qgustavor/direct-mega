@@ -49,7 +49,9 @@ function fetchHandler (event) {
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <style>body{margin:20px;line-height:1.6;font-size:18px;color:#444;padding:0 10px}h1,h2,h3{line-height:1.2}</style>
 <h1>"${escapeHTML(file.name)}" folder contents</h1>
-<ul>${file.children.map(file => {
+<ul>${file.children.sort((left, right) => {
+  return (left.name || '').localeCompare(right.name || '')
+}).map(file => {
   return `<li><a href="${escapeHTML(requestURL + '!' + file.downloadId[1])}">${escapeHTML(file.name)}</a></li>`
 }).join('\n')}</ul>`
 
