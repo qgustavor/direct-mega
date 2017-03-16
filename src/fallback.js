@@ -5,7 +5,7 @@ const body = document.body
 let url = null
 
 function handleFallback () {
-  if (location.pathname === '/view') {
+  if (location.pathname.indexOf('/view') === 0) {
     showMessage("Viewing files isn't supported in this browser. The file will be downloaded.")
   }
   
@@ -78,7 +78,7 @@ function afterDownload (error, data, file) {
 
   paragraph.appendChild(document.createTextNode('Your download should be starting soon.'))
   paragraph.appendChild(document.createElement('br'))
-  paragraph.appendChild(document.createTextNode('If it dont starts'))
+  paragraph.appendChild(document.createTextNode('If it dont starts '))
 
   const anchor = document.createElement('a')
   anchor.href = window.URL.createObjectURL(new window.Blob([data.buffer || data], { type: 'application/octet-stream' }))

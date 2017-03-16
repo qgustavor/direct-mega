@@ -59,7 +59,7 @@ function fetchHandler (event) {
       const headers = {}
       headers['Content-Length'] = file.size
 
-      if (parsedURL.pathname === '/view') {
+      if (parsedURL.pathname.startsWith('/view')) {
         headers['Content-Security-Policy'] = 'sandbox'
         headers['Content-Type'] = mime.contentType(file.name)
       } else {
