@@ -27,26 +27,31 @@ self.addEventListener('foreignfetch', fetchHandler)
 self.addEventListener('fetch', fetchHandler)
 
 function fetchHandler (event) {
+  if (event.request.method !== 'GET') return
+
   const requestURL = event.request.url
+  if (!requestURL.includes(location.origin)) return
+
   const parsedURL = new self.URL(requestURL)
   const identifier = (parsedURL.search || '').substr(1)
   const hasFile = identifier.startsWith('!') || identifier.startsWith('F!')
   const requiredFile = hasFile && `https://mega.nz/#${identifier}`
 
-  const response = requiredFile ? (new Promise((resolve, reject) => {
+  const response = requiredFile
+  ? (new Promise((resolve, reject) => {
     const file = File.fromURL(requiredFile)
     file.loadAttributes((err, file) => {
       if (err) return reject(err)
 
-      if (file.folder) {
+      if (file.children) {
         const folderContent = `<!DOCTYPE html><meta charset="utf-8">
-        <title>"${escapeHTML(file.name)}" folder contents</title>
-        <meta name="viewport" content="width=device-width, initial-scale=1">
-        <style>body{margin:20px;line-height:1.6;font-size:18px;color:#444;padding:0 10px}h1,h2,h3{line-height:1.2}</style>
-        <h1>"${escapeHTML(file.name)}" folder contents</h1>
-        <ul>${file.children.map(file => {
-          return `<li><a href="${escapeHTML(requestURL + '!' + file.handle)}">${escapeHTML(file.name)}</a></li>`
-        }).join('')}</ul>`
+<title>"${escapeHTML(file.name)}" folder contents</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<style>body{margin:20px;line-height:1.6;font-size:18px;color:#444;padding:0 10px}h1,h2,h3{line-height:1.2}</style>
+<h1>"${escapeHTML(file.name)}" folder contents</h1>
+<ul>${file.children.map(file => {
+  return `<li><a href="${escapeHTML(requestURL + '!' + file.downloadId[1])}">${escapeHTML(file.name)}</a></li>`
+}).join('\n')}</ul>`
 
         const response = new self.Response(folderContent, { headers: {
           'Content-Type': 'text/html',
@@ -60,7 +65,8 @@ function fetchHandler (event) {
       headers['Content-Length'] = file.size
 
       if (parsedURL.pathname.includes('/view')) {
-        headers['Content-Security-Policy'] = 'default-src none; sandbox'
+        headers['Content-Security-Policy'] = 'default-src none ' + requestURL + '; sandbox'
+        headers['Content-Disposition'] = 'inline; filename=' + file.name
         headers['Content-Type'] = mime.contentType(file.name)
       } else {
         headers['Content-Disposition'] = 'attachment; filename=' + file.name
@@ -107,7 +113,11 @@ function fetchHandler (event) {
       ]),
       {headers: { 'Content-Type': 'text/plain; charset=utf-8' }}
     )
-  }) : self.Response.redirect('https://github.com/qgustavor/direct-mega/blob/gh-pages/README.md#direct-mega')
+  })
+  // If 'main.js' is requested then the worker wasn't ready yet...
+  : parsedURL.pathname.includes('/main.js')
+  ? new Response(new Blob(['setTimeout(()=>location.reload(),100)'], {type: 'application/javascript'}))
+  : self.Response.redirect('https://github.com/qgustavor/direct-mega/blob/gh-pages/README.md#direct-mega')
 
   event.respondWith(response)
 }

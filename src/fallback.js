@@ -43,7 +43,7 @@ function afterLoadAttributes (error, file) {
 
   showMessage('"' + file.name + '" opened')
 
-  if (file.folder) {
+  if (file.children) {
     showMessage("For now folders can't be downloaded. Select a file from the list below:")
 
     let fileList = document.createElement('ul')
