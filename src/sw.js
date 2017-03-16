@@ -59,8 +59,8 @@ function fetchHandler (event) {
       const headers = {}
       headers['Content-Length'] = file.size
 
-      if (parsedURL.pathname.startsWith('/view')) {
-        headers['Content-Security-Policy'] = 'sandbox'
+      if (parsedURL.pathname.includes('/view')) {
+        headers['Content-Security-Policy'] = 'default-src none; sandbox'
         headers['Content-Type'] = mime.contentType(file.name)
       } else {
         headers['Content-Disposition'] = 'attachment; filename=' + file.name

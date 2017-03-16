@@ -5,7 +5,7 @@ const body = document.body
 let url = null
 
 function handleFallback () {
-  if (location.pathname.indexOf('/view') === 0) {
+  if (location.pathname.indexOf('/view') !== -1) {
     showMessage("Viewing files isn't supported in this browser. The file will be downloaded.")
   }
   
