@@ -72,6 +72,7 @@ function fetchHandler (event) {
       resolve(new self.Response(new self.ReadableStream({
         start: controller => {
           stream.on('data', data => controller.enqueue(new Uint8Array(data)))
+          stream.on('error', (error) => controller.error(error))
           stream.on('end', () => controller.close())
         },
         cancel: () => {
