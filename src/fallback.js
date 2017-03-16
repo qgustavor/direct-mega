@@ -6,9 +6,20 @@ let url = null
 
 function handleFallback () {
   if (location.pathname.indexOf('/view') !== -1) {
-    showMessage("Viewing files isn't supported in this browser. The file will be downloaded.")
+    showMessage("Viewing files isn't supported in this browser.")
+
+    const paragraph = document.createElement('p')
+    paragraph.appendChild(document.createTextNode('You can '))
+    const anchor = document.createElement('a')
+    anchor.href = location.href.replace('/view', '/')
+    anchor.textContent = 'download it'
+    paragraph.appendChild(anchor)
+    paragraph.appendChild(document.createTextNode('.'))
+    body.appendChild(paragraph)
+
+    return
   }
-  
+
   const identifier = (location.hash.length > 2 ? location.hash : location.search || '').substr(1)
   url = 'https://mega.nz/#' + identifier
 
