@@ -33,7 +33,7 @@ function fetchHandler (event) {
   const hasFile = identifier.startsWith('!') || identifier.startsWith('F!')
   const requiredFile = hasFile && `https://mega.nz/#${identifier}`
 
-  const promise = requiredFile ? (new Promise((resolve, reject) => {
+  const response = requiredFile ? (new Promise((resolve, reject) => {
     const file = File.fromURL(requiredFile)
     file.loadAttributes((err, file) => {
       if (err) return reject(err)
@@ -79,9 +79,7 @@ function fetchHandler (event) {
         }
       }), { headers }))
     })
-  })) : self.Response.redirect('https://github.com/qgustavor/direct-mega/blob/gh-pages/README.md#direct-mega')
-
-  event.respondWith(promise.catch(error => {
+  })).catch(error => {
     setTimeout(() => {
       // Rollbar JavaScript API isn't compatible with Service Workers, so we're using the JSON API
       self.fetch('https://api.rollbar.com/api/1/item/', {
@@ -108,5 +106,7 @@ function fetchHandler (event) {
       ]),
       {headers: { 'Content-Type': 'text/plain; charset=utf-8' }}
     )
-  }))
+  }) : self.Response.redirect('https://github.com/qgustavor/direct-mega/blob/gh-pages/README.md#direct-mega')
+
+  event.respondWith(response)
 }
