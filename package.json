@@ -20,6 +20,12 @@
   },
   "homepage": "https://github.com/qgustavor/direct-mega#readme",
   "private": true,
+  "standard": {
+    "ignore": [
+      "dist/sw.js",
+      "dist/fallback.js"
+    ]
+  },
   "devDependencies": {
     "babel-plugin-external-helpers": "^6.22.0",
     "babel-preset-latest": "^6.24.0",

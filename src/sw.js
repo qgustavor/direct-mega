@@ -30,7 +30,7 @@ function fetchHandler (event) {
   if (event.request.method !== 'GET') return
 
   const requestURL = event.request.url
-  if (!requestURL.includes(location.origin)) return
+  if (!requestURL.includes(self.location.origin)) return
 
   const parsedURL = new self.URL(requestURL)
   const identifier = (parsedURL.search || '').substr(1)
@@ -118,7 +118,7 @@ function fetchHandler (event) {
   })
   // If 'main.js' is requested then the worker wasn't ready yet...
   : parsedURL.pathname.includes('/main.js')
-  ? new Response(new Blob(['setTimeout(()=>location.reload(),100)'], {type: 'application/javascript'}))
+  ? new self.Response(new self.Blob(['setTimeout(()=>location.reload(),100)'], {type: 'application/javascript'}))
   : self.Response.redirect('https://github.com/qgustavor/direct-mega/blob/gh-pages/README.md#direct-mega')
 
   event.respondWith(response)
