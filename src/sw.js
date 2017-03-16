@@ -103,6 +103,9 @@ function fetchHandler (event) {
               'message': {
                 'body': error.stack || error
               }
+            },
+            'client': {
+              'browser': navigator.userAgent
             }
           }
         })
