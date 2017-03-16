@@ -30,8 +30,8 @@ function fetchHandler (event) {
   const requestURL = event.request.url
   const parsedURL = new self.URL(requestURL)
   const identifier = (parsedURL.search || '').substr(1)
-  const requiredFile = identifier.charAt(0) === '!'
-    ? `https://mega.nz/#${identifier}` : null
+  const hasFile = identifier.startsWith('!') || identifier.startsWith('F!')
+  const requiredFile = hasFile && `https://mega.nz/#${identifier}`
 
   const promise = requiredFile ? (new Promise((resolve, reject) => {
     const file = File.fromURL(requiredFile)

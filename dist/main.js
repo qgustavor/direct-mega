@@ -9,10 +9,12 @@
 
   var location = window.location
   var identifier = (location.hash.length > 2 ? location.hash : location.search || '').substr(1)
-  var hasFile = identifier.length < 4
+  var hasFile = identifier.startsWith('!') || identifier.startsWith('F!')
 
   if (navigator.serviceWorker && typeof ReadableStream === 'function') {
-    navigator.serviceWorker.register('sw.js', {scope: '.'}).then(function () {
+    navigator.serviceWorker.register('sw.js', {scope: '.'})
+    .then(navigator.serviceWorker.ready)
+    .then(function () {
       if (hasFile) {
         location.reload()
       } else {

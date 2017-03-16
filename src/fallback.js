@@ -5,6 +5,10 @@ const body = document.body
 let url = null
 
 function handleFallback () {
+  if (location.pathname === '/view') {
+    showMessage("Viewing files isn't supported in this browser. The file will be downloaded.")
+  }
+  
   const identifier = (location.hash.length > 2 ? location.hash : location.search || '').substr(1)
   url = 'https://mega.nz/#' + identifier
 
