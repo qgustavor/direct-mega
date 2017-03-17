@@ -2,6 +2,7 @@ import { File } from 'megajs/dist/main.browser-es.js'
 
 const location = window.location
 const body = document.body
+let identifier = null
 let url = null
 
 function handleFallback () {
@@ -20,7 +21,7 @@ function handleFallback () {
     return
   }
 
-  const identifier = (location.hash.length > 2 ? location.hash : location.search || '').substr(1)
+  identifier = (location.hash.length > 2 ? location.hash : location.search || '').substr(1)
   url = 'https://mega.nz/#' + identifier
 
   let file
