@@ -123,7 +123,7 @@ function fetchHandler (event) {
   // If 'main.js' is requested then the worker wasn't ready yet...
   : parsedURL.pathname.includes('/main.js')
   ? new self.Response(new self.Blob(['setTimeout(()=>location.reload(),100)'], {type: 'application/javascript'}))
-  : self.Response.redirect('https://github.com/qgustavor/direct-mega/blob/gh-pages/README.md#direct-mega')
+  : self.Response.redirect('https://github.com/qgustavor/direct-mega#direct-mega')
 
   event.respondWith(response)
 }
