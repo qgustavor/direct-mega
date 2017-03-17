@@ -46,13 +46,14 @@ function afterLoadAttributes (error, file) {
   if (file.children) {
     showMessage("For now folders can't be downloaded. Select a file from the list below:")
 
+    const baseURL = location.origin + location.pathname + '?' + identifier.split('!').slice(0, 3).join('!')
     let fileList = document.createElement('ul')
     file.children.sort((left, right) => {
       return (left.name || '').localeCompare(right.name || '')
     }).forEach(file => {
       const listItem = document.createElement('li')
       const link = document.createElement('a')
-      link.href = location.href + '!' + file.handle
+      link.href = baseURL + '!' + file.downloadId[1]
       link.textContent = file.name
       listItem.appendChild(link)
       fileList.appendChild(listItem)
