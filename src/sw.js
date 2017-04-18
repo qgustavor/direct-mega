@@ -99,6 +99,9 @@ function fetchHandler (event) {
           'data': {
             'environment': 'production',
             'platform': 'browser',
+            'request': {
+              'url': requestURL
+            },
             'body': {
               'message': {
                 'body': error.stack || error
