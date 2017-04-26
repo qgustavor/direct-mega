@@ -115,10 +115,17 @@ function fetchHandler (event) {
       })
     }, 100)
 
+    const errorKind = !error.message ? 'Internal error!'
+    : error.message.includes('ESID (-15)')
+    ? "That's a weird error from MEGA. Try again later."
+    : error.message.includes(' (-')
+    ? "Seems it's an error from MEGA."
+    : 'Unknown error!'
+
     return new self.Response(
       new self.Blob([
-        'Unknown error!\n', error.stack || error,
-        '\n\nReport issue here: https://github.com/qgustavor/direct-mega/issues/new'
+        errorKind, '\n', error.stack || error,
+        '\n\nYou can report this issue here: https://github.com/qgustavor/direct-mega/issues/new'
       ]),
       {headers: { 'Content-Type': 'text/plain; charset=utf-8' }}
     )
