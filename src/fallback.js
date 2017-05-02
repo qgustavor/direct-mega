@@ -13,7 +13,7 @@ function handleFallback () {
     paragraph.appendChild(document.createTextNode('You can '))
     const anchor = document.createElement('a')
     anchor.href = location.href.replace('/view', '/')
-    anchor.textContent = 'download it'
+    anchor.textContent = 'download this file'
     paragraph.appendChild(anchor)
     paragraph.appendChild(document.createTextNode('.'))
     body.appendChild(paragraph)
