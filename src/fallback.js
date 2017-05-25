@@ -1,4 +1,4 @@
-import { File } from 'megajs/dist/main.browser-es.js'
+import { File } from 'megajs'
 
 const location = window.location
 const body = document.body
@@ -93,7 +93,7 @@ function afterDownload (error, data, file) {
 
   paragraph.appendChild(document.createTextNode('Your download should be starting soon.'))
   paragraph.appendChild(document.createElement('br'))
-  paragraph.appendChild(document.createTextNode('If it dont starts '))
+  paragraph.appendChild(document.createTextNode("If it don't starts "))
 
   const anchor = document.createElement('a')
   anchor.href = window.URL.createObjectURL(new window.Blob([data.buffer || data], { type: 'application/octet-stream' }))

@@ -1,6 +1,6 @@
 /* eslint-env serviceworker */
 
-import { File } from 'megajs/dist/main.browser-es.js'
+import { File } from 'megajs'
 import escapeHTML from 'escape-html'
 import mime from 'mime-types'
 
@@ -25,6 +25,13 @@ self.addEventListener('activate', function (event) {
 // So we will not spend a single line doing the noCredentialsRequest trick!
 self.addEventListener('foreignfetch', fetchHandler)
 self.addEventListener('fetch', fetchHandler)
+
+// Some content types that don't work unless CSP is disabled
+const CSP_WHITELIST = [
+  // For some reason PDFs are blocked in sandboxed pages
+  // in Chrome... even if it has it's own PDF renderer
+  'application/pdf'
+]
 
 function fetchHandler (event) {
   if (event.request.method !== 'GET') return
@@ -67,11 +74,14 @@ function fetchHandler (event) {
 
       const headers = {}
       headers['Content-Length'] = file.size
+      const contentType = mime.contentType(file.name)
 
       if (isView) {
-        headers['Content-Security-Policy'] = 'default-src none ' + requestURL + '; sandbox'
+        if (!CSP_WHITELIST.includes(contentType)) {
+          headers['Content-Security-Policy'] = 'default-src none ' + requestURL + '; sandbox'
+        }
         headers['Content-Disposition'] = 'inline; filename=' + file.name
-        headers['Content-Type'] = mime.contentType(file.name)
+        headers['Content-Type'] = contentType
       } else {
         headers['Content-Disposition'] = 'attachment; filename=' + file.name
         headers['Content-Type'] = 'application/octet-stream; charset=utf-8'
