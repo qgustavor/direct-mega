@@ -101,9 +101,13 @@ function fetchHandler (event) {
       }), { headers }))
     })
   })).catch(error => {
-    const fileNotFound = error.message && error.message.includes('ENOENT (-9)')
+    const fileNotFound = error.message && (
+      error.message.includes('ENOENT (-9)') ||
+      error.message.includes('EACCESS (-11)')
+    )
+    const wrongKey = error.message && error.message.includes('could not be decrypted')
 
-    if (!fileNotFound) {
+    if (!fileNotFound && !wrongKey) {
       setTimeout(() => {
         // Rollbar JavaScript API isn't compatible with Service Workers, so we're using the JSON API
         self.fetch('https://api.rollbar.com/api/1/item/', {
@@ -130,12 +134,18 @@ function fetchHandler (event) {
       }, 100)
     }
 
-    if (fileNotFound) {
+    if (fileNotFound || wrongKey) {
       // From HTML5 Boilerplate
+      const title = fileNotFound ? 'File Not Found' : 'Invalid Decryption Key'
+      const message = fileNotFound
+      ? `Sorry, but the file you were trying to ${isView ? 'view' : 'download'} does not exist.`
+      : `The provided decryption key is invalid. Check the URL and try again.`
+      const status = fileNotFound ? 404 : 403
+
       return new self.Response(
-        new self.Blob([`<!doctype html><html lang=en><head><meta charset=utf-8><title>File Not Found</title><meta name=viewport content="width=device-width, initial-scale=1">
-<style>*{line-height:1.2;margin:0}html{color:#888;display:table;font-family:sans-serif;height:100%;text-align:center;width:100%}body{display:table-cell;vertical-align:middle;margin:2em auto}h1{color:#555;font-size:2em;font-weight:400}p{margin:0 auto;width:280px}@media only screen and (max-width:280px){body,p{width:95%}h1{font-size:1.5em;margin:0 0 .3em}}</style></head><body><h1>File Not Found</h1><p>Sorry, but the file you were trying to ${isView ? 'view' : 'download'} does not exist.</p></body></html>`]),
-        {status: 404, headers: { 'Content-Type': 'text/html; charset=utf-8' }}
+        new self.Blob([`<!doctype html><html lang=en><head><meta charset=utf-8><title>${title}</title><meta name=viewport content="width=device-width, initial-scale=1">
+<style>*{line-height:1.2;margin:0}html{color:#888;display:table;font-family:sans-serif;height:100%;text-align:center;width:100%}body{display:table-cell;vertical-align:middle;margin:2em auto}h1{color:#555;font-size:2em;font-weight:400}p{margin:0 auto;width:280px}@media only screen and (max-width:280px){body,p{width:95%}h1{font-size:1.5em;margin:0 0 .3em}}</style></head><body><h1>${title}</h1><p>${message}</p></body></html>`]),
+        {status, headers: { 'Content-Type': 'text/html; charset=utf-8' }}
       )
     }
 
@@ -149,14 +159,16 @@ function fetchHandler (event) {
     return new self.Response(
       new self.Blob([
         errorKind, '\n', error.stack || error,
-        '\n\nYou can report this issue here: https://github.com/qgustavor/direct-mega/issues/new'
+        '\n\nYou can report this issue here: https://github.com/qgustavor/direct-mega/issues',
+        '\n\nYou can also try loading it directly in MEGA: ', requiredFile,
+        '\nPlease note: if loading the file in MEGA fails then it will not load here.'
       ]),
       {status: 500, headers: { 'Content-Type': 'text/plain; charset=utf-8' }}
     )
   })
   // If 'main.js' is requested then the worker wasn't ready yet...
   : parsedURL.pathname.includes('/main.js')
-  ? new self.Response(new self.Blob(['setTimeout(()=>location.reload(),100)'], {type: 'application/javascript'}))
+  ? new self.Response(new self.Blob(['setTimeout(()=>location.reload(),9)'], {type: 'application/javascript'}))
   // Service Worker is installed but no file was requested, redirect to help page:
   : self.Response.redirect('https://github.com/qgustavor/direct-mega#direct-mega')
 
