@@ -33,6 +33,20 @@ const CSP_WHITELIST = [
   'application/pdf'
 ]
 
+function generateFileList (file, baseURL) {
+  return `<ul>${file.children.sort((left, right) => {
+    return (left.name || '').localeCompare(right.name || '')
+  }).map(file => {
+    if (file.directory) {
+      return `<li><details>
+        <summary><strong>${escapeHTML(file.name)}</strong></summary>
+        ${generateFileList(file, baseURL)}
+      </details></li>`
+    }
+    return `<li><a href="${escapeHTML(baseURL + '!' + file.downloadId[1])}">${escapeHTML(file.name)}</a></li>`
+  }).join('\n')}</ul>`
+}
+
 function fetchHandler (event) {
   if (event.request.method !== 'GET') return
 
@@ -54,15 +68,11 @@ function fetchHandler (event) {
       if (file.children) {
         const baseURL = parsedURL.origin + parsedURL.pathname + '?' + identifier.split('!').slice(0, 3).join('!')
         const folderContent = `<!DOCTYPE html><meta charset="utf-8">
-<title>"${escapeHTML(file.name)}" folder contents</title>
+<title>"${escapeHTML(file.name)}" folder contents - Direct MEGA</title>
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <style>body{margin:20px;line-height:1.6;font-size:18px;color:#444;padding:0 10px}h1,h2,h3{line-height:1.2}</style>
 <h1>"${escapeHTML(file.name)}" folder contents</h1>
-<ul>${file.children.sort((left, right) => {
-  return (left.name || '').localeCompare(right.name || '')
-}).map(file => {
-  return `<li><a href="${escapeHTML(baseURL + '!' + file.downloadId[1])}">${escapeHTML(file.name)}</a></li>`
-}).join('\n')}</ul>`
+${generateFileList(file, baseURL)}`
 
         const response = new self.Response(folderContent, { headers: {
           'Content-Type': 'text/html',
@@ -80,10 +90,10 @@ function fetchHandler (event) {
         if (!CSP_WHITELIST.includes(contentType)) {
           headers['Content-Security-Policy'] = 'default-src none ' + requestURL + '; sandbox'
         }
-        headers['Content-Disposition'] = 'inline; filename=' + file.name
+        headers['Content-Disposition'] = "inline; filename*=UTF-8''" + self.encodeURIComponent(file.name)
         headers['Content-Type'] = contentType
       } else {
-        headers['Content-Disposition'] = 'attachment; filename=' + file.name
+        headers['Content-Disposition'] = "attachment; filename*=UTF-8''" + self.encodeURIComponent(file.name)
         headers['Content-Type'] = 'application/octet-stream; charset=utf-8'
       }
 
@@ -135,15 +145,16 @@ function fetchHandler (event) {
     }
 
     if (fileNotFound || wrongKey) {
-      // From HTML5 Boilerplate
       const title = fileNotFound ? 'File Not Found' : 'Invalid Decryption Key'
       const message = fileNotFound
       ? `Sorry, but the file you were trying to ${isView ? 'view' : 'download'} does not exist.`
       : `The provided decryption key is invalid. Check the URL and try again.`
       const status = fileNotFound ? 404 : 403
 
+      // From HTML5 Boilerplate
       return new self.Response(
-        new self.Blob([`<!doctype html><html lang=en><head><meta charset=utf-8><title>${title}</title><meta name=viewport content="width=device-width, initial-scale=1">
+        new self.Blob([`<!doctype html><html lang=en><head><meta charset=utf-8><title>${title} - Direct MEGA</title>
+        <meta name=viewport content="width=device-width, initial-scale=1">
 <style>*{line-height:1.2;margin:0}html{color:#888;display:table;font-family:sans-serif;height:100%;text-align:center;width:100%}body{display:table-cell;vertical-align:middle;margin:2em auto}h1{color:#555;font-size:2em;font-weight:400}p{margin:0 auto;width:280px}@media only screen and (max-width:280px){body,p{width:95%}h1{font-size:1.5em;margin:0 0 .3em}}</style></head><body><h1>${title}</h1><p>${message}</p></body></html>`]),
         {status, headers: { 'Content-Type': 'text/html; charset=utf-8' }}
       )
@@ -169,8 +180,10 @@ function fetchHandler (event) {
   // If 'main.js' is requested then the worker wasn't ready yet...
   : parsedURL.pathname.includes('/main.js')
   ? new self.Response(new self.Blob(['setTimeout(()=>location.reload(),9)'], {type: 'application/javascript'}))
-  // Service Worker is installed but no file was requested, redirect to help page:
-  : self.Response.redirect('https://github.com/qgustavor/direct-mega#direct-mega')
+  // Service Worker is installed but no file was requested, check the hash and redirect to help page:
+  : new self.Response(new self.Blob([`<!doctype html><title>Direct MEGA</title>
+    <script>location.href=location.hash.length>1?location.href.replace('#','?')
+    :'https://github.com/qgustavor/direct-mega#direct-mega'</script>`], {type: 'text/html'}))
 
   event.respondWith(response)
 }

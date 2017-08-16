@@ -5,6 +5,7 @@
 
   var installingMessage = document.createElement('p')
   installingMessage.textContent = 'Please wait...'
+  window.installingMessage = installingMessage
   document.body.appendChild(installingMessage)
 
   var location = window.location

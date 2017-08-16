@@ -42,5 +42,8 @@
     "rollup-plugin-node-resolve": "^2.0.0",
     "rollup-plugin-uglify": "^1.0.1",
     "standard": "^9.0.1"
+  },
+  "dependencies": {
+    "megajs": "^0.11.3"
   }
 }
