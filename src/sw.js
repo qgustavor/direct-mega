@@ -116,8 +116,9 @@ ${generateFileList(file, baseURL)}`
       error.message.includes('EACCESS (-11)')
     )
     const wrongKey = error.message && error.message.includes('could not be decrypted')
+    const invalidURL = error.message && error.message.includes('Invalid argument: ')
 
-    if (!fileNotFound && !wrongKey) {
+    if (!fileNotFound && !wrongKey && !invalidURL) {
       setTimeout(() => {
         // Rollbar JavaScript API isn't compatible with Service Workers, so we're using the JSON API
         self.fetch('https://api.rollbar.com/api/1/item/', {
@@ -144,9 +145,13 @@ ${generateFileList(file, baseURL)}`
       }, 100)
     }
 
-    if (fileNotFound || wrongKey) {
-      const title = fileNotFound ? 'File Not Found' : 'Invalid Decryption Key'
-      const message = fileNotFound
+    if (fileNotFound || wrongKey || invalidURL) {
+      const title = invalidURL ? 'Invalid URL'
+        : fileNotFound ? 'File Not Found'
+        : 'Invalid Decryption Key'
+      const message = invalidURL
+      ? `The provided URL includes invalid characters. Check it and try again.`
+      : fileNotFound
       ? `Sorry, but the file you were trying to ${isView ? 'view' : 'download'} does not exist.`
       : `The provided decryption key is invalid. Check the URL and try again.`
       const status = fileNotFound ? 404 : 403
