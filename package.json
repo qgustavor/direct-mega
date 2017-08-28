@@ -1,7 +1,7 @@
 {
   "name": "direct-mega",
   "version": "1.0.0",
-  "description": "MEGA + ServiceWorkers = Direct MEGA",
+  "description": "MEGA + Service Workers = Direct MEGA",
   "scripts": {
     "test": "standard",
     "build": "npm run build:sw && npm run build:fallback",
@@ -29,10 +29,7 @@
   "devDependencies": {
     "babel-plugin-external-helpers": "^6.22.0",
     "babel-preset-latest": "^6.24.0",
-    "escape-html": "^1.0.3",
     "gh-pages": "^0.12.0",
-    "megajs": "^0.11.5",
-    "mime-types": "^2.1.16",
     "rollup": "^0.41.5",
     "rollup-plugin-babel": "^2.7.1",
     "rollup-plugin-commonjs": "^8.1.0",
@@ -43,5 +40,10 @@
     "rollup-plugin-uglify": "^1.0.1",
     "standard": "^9.0.1"
   },
-  "dependencies": {}
+  "dependencies": {
+    "escape-html": "^1.0.3",
+    "megajs": "^0.12.2",
+    "mime-types": "^2.1.16",
+    "range-parser": "^1.2.0"
+  }
 }

@@ -3,6 +3,7 @@
 import { File } from 'megajs'
 import escapeHTML from 'escape-html'
 import mime from 'mime-types'
+import rangeParser from 'range-parser'
 
 self.addEventListener('install', function (event) {
   if (event.registerForeignFetch) {
@@ -30,7 +31,10 @@ self.addEventListener('fetch', fetchHandler)
 const CSP_WHITELIST = [
   // For some reason PDFs are blocked in sandboxed pages
   // in Chrome... even if it has it's own PDF renderer
-  'application/pdf'
+  'application/pdf',
+  // Chrome hides the controls because styles aren't applied
+  'video/',
+  'audio/'
 ]
 
 function generateFileList (file, baseURL) {
@@ -54,10 +58,23 @@ function fetchHandler (event) {
   if (!requestURL.includes(self.location.origin)) return
 
   const parsedURL = new self.URL(requestURL)
-  const identifier = (parsedURL.search || '').substr(1)
+  const urlArguments = (parsedURL.search || '').substr(1).split('&')
+  const identifier = urlArguments[0]
+
+  const extraArguments = urlArguments.slice(1).reduce((obj, element) => {
+    const parts = element.split('=')
+    if (parts.length === 1) {
+      obj[element.toLowerCase()] = true
+    } else {
+      obj[parts[0].toLowerCase()] = parts.slice(1).join('=')
+    }
+    return obj
+  }, {})
+
   const hasFile = identifier.startsWith('!') || identifier.startsWith('F!')
   const requiredFile = hasFile && `https://mega.nz/#${identifier}`
   const isView = parsedURL.pathname.includes('/view')
+  const range = event.request.headers.get('Range')
 
   const response = requiredFile
   ? (new Promise((resolve, reject) => {
@@ -83,21 +100,55 @@ ${generateFileList(file, baseURL)}`
       }
 
       const headers = {}
-      headers['Content-Length'] = file.size
-      const contentType = mime.contentType(file.name)
 
+      const useHttpRange = extraArguments['use-http-range']
+      if (useHttpRange) {
+        headers['Accept-Ranges'] = 'bytes'
+      }
+
+      const date = new Date(file.timestamp * 1000)
+      if (!isNaN(date.getTime())) {
+        headers['Last-Modified'] = date.toGMTString()
+        headers['Date'] = headers['Last-Modified']
+      }
+
+      let start = extraArguments.start && Number(extraArguments.start)
+      let end = extraArguments.end && Number(extraArguments.end)
+
+      if (useHttpRange && range) {
+        const parsedRange = rangeParser(file.size, range, { combine: true })
+        if (parsedRange === -1 || parsedRange === -2 || parsedRange.length > 1) {
+          resolve(new self.Response(new self.Blob(['Range Not Satisfiable']), {
+            status: 416,
+            headers: {
+              'Content-Type': 'text/plain; charset=utf-8',
+              'Content-Range': '*/0'
+            }
+          }))
+          return
+        }
+
+        start = parsedRange[0].start
+        end = parsedRange[0].end
+
+        headers['Content-Range'] = `bytes ${start}-${end}/${file.size}`
+        headers['Content-Length'] = end - start + 1
+      } else {
+        headers['Content-Length'] = file.size
+      }
+
+      const contentType = mime.contentType(file.name)
       if (isView) {
-        if (!CSP_WHITELIST.includes(contentType)) {
+        if (!CSP_WHITELIST.find(type => contentType.startsWith(type))) {
           headers['Content-Security-Policy'] = 'default-src none ' + requestURL + '; sandbox'
         }
-        headers['Content-Disposition'] = "inline; filename*=UTF-8''" + self.encodeURIComponent(file.name)
         headers['Content-Type'] = contentType
       } else {
         headers['Content-Disposition'] = "attachment; filename*=UTF-8''" + self.encodeURIComponent(file.name)
         headers['Content-Type'] = 'application/octet-stream; charset=utf-8'
       }
 
-      const stream = file.download()
+      const stream = file.download({ start, end })
 
       resolve(new self.Response(new self.ReadableStream({
         start: controller => {
@@ -108,7 +159,10 @@ ${generateFileList(file, baseURL)}`
         cancel: () => {
           stream.emit('close')
         }
-      }), { headers }))
+      }), {
+        status: useHttpRange && range ? 206 : 200,
+        headers
+      }))
     })
   })).catch(error => {
     const fileNotFound = error.message && (
