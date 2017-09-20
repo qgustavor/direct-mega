@@ -2,6 +2,7 @@ import { File } from 'megajs'
 
 const location = window.location
 const body = document.body
+let extraArguments = null
 let identifier = null
 let url = null
 
@@ -21,8 +22,19 @@ function handleFallback () {
     return
   }
 
-  identifier = (location.hash.length > 2 ? location.hash : location.search || '').substr(1)
+  const urlArguments = (location.hash.length > 2 ? location.hash : location.search || '').substr(1).split('&')
+  identifier = urlArguments[0]
   url = 'https://mega.nz/#' + identifier
+
+  extraArguments = urlArguments.slice(1).reduce((obj, element) => {
+    const parts = element.split('=')
+    if (parts.length === 1) {
+      obj[element.toLowerCase()] = true
+    } else {
+      obj[parts[0].toLowerCase()] = parts.slice(1).join('=')
+    }
+    return obj
+  }, {})
 
   let file
 
@@ -81,7 +93,9 @@ function afterLoadAttributes (error, file) {
     return
   }
 
-  const downloadStream = file.download((err, data) => {
+  const downloadStream = file.download({
+    returnCiphertext: !!extraArguments.cipher
+  }, (err, data) => {
     afterDownload(err, data, file)
   })
   handleProgress(downloadStream, file.size)
@@ -114,7 +128,7 @@ function afterDownload (error, data, file) {
 
   const anchor = document.createElement('a')
   anchor.href = window.URL.createObjectURL(new window.Blob([data.buffer || data], { type: 'application/octet-stream' }))
-  anchor.download = file.name
+  anchor.download = extraArguments.name || file.name
   anchor.textContent = 'click here'
   paragraph.appendChild(anchor)
 

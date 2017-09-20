@@ -137,18 +137,23 @@ ${generateFileList(file, baseURL)}`
         headers['Content-Length'] = file.size
       }
 
-      const contentType = mime.contentType(file.name)
+      const fileName = extraArguments.name || file.name
+      const contentType = mime.contentType(fileName) || 'application/octet-stream'
       if (isView) {
         if (!CSP_WHITELIST.find(type => contentType.startsWith(type))) {
           headers['Content-Security-Policy'] = 'default-src none ' + requestURL + '; sandbox'
         }
         headers['Content-Type'] = contentType
       } else {
-        headers['Content-Disposition'] = "attachment; filename*=UTF-8''" + self.encodeURIComponent(file.name)
+        headers['Content-Disposition'] = "attachment; filename*=UTF-8''" + self.encodeURIComponent(fileName)
         headers['Content-Type'] = 'application/octet-stream; charset=utf-8'
       }
 
-      const stream = file.download({ start, end })
+      const stream = file.download({
+        returnCiphertext: !!extraArguments.cipher,
+        start,
+        end
+      })
 
       resolve(new self.Response(new self.ReadableStream({
         start: controller => {
