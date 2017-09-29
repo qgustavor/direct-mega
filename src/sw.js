@@ -4,6 +4,7 @@ import { File } from 'megajs'
 import escapeHTML from 'escape-html'
 import mime from 'mime-types'
 import rangeParser from 'range-parser'
+import bytes from 'bytes'
 
 self.addEventListener('install', function (event) {
   if (event.registerForeignFetch) {
@@ -71,14 +72,27 @@ function fetchHandler (event) {
     return obj
   }, {})
 
-  const hasFile = identifier.startsWith('!') || identifier.startsWith('F!')
-  const requiredFile = hasFile && `https://mega.nz/#${identifier}`
+  // Shorthands
+  if (extraArguments.c) extraArguments.cipher = extraArguments.c
+  if (typeof extraArguments.cipher === 'string') {
+    extraArguments.name = extraArguments.cipher
+  }
+
+  const parts = identifier.split('!')
+  const isDirectory = parts[0] === 'F'
+  const isValid = parts[0] === '' || isDirectory
   const isView = parsedURL.pathname.includes('/view')
   const range = event.request.headers.get('Range')
 
-  const response = requiredFile
+  const response = isValid
   ? (new Promise((resolve, reject) => {
-    const file = File.fromURL(requiredFile)
+    if (!extraArguments.cipher && !parts[2]) throw Error('Missing encryption key')
+    const file = new File({
+      downloadId: parts[1],
+      key: extraArguments.cipher ? null : parts[2],
+      directory: isDirectory,
+      loadedFile: parts[3]
+    })
     file.loadAttributes((err, file) => {
       if (err) return reject(err)
 
@@ -112,8 +126,8 @@ ${generateFileList(file, baseURL)}`
         headers['Date'] = headers['Last-Modified']
       }
 
-      let start = extraArguments.start && Number(extraArguments.start)
-      let end = extraArguments.end && Number(extraArguments.end)
+      let start = extraArguments.start && bytes.parse(extraArguments.start)
+      let end = extraArguments.end && (bytes.parse(extraArguments.end) - 1 || null)
 
       if (useHttpRange && range) {
         const parsedRange = rangeParser(file.size, range, { combine: true })
@@ -172,12 +186,19 @@ ${generateFileList(file, baseURL)}`
   })).catch(error => {
     const fileNotFound = error.message && (
       error.message.includes('ENOENT (-9)') ||
-      error.message.includes('EACCESS (-11)')
+      error.message.includes('EACCESS (-11)') ||
+      error.message.includes('EBLOCKED (-16)')
     )
     const wrongKey = error.message && error.message.includes('could not be decrypted')
     const invalidURL = error.message && error.message.includes('Invalid argument: ')
+    const tooManyConnections = error.message && error.message.includes('ETOOMANY')
+    const bandwithLimit = error.message && error.message.includes('Bandwidth limit')
+    const rangeError = error.message && error.message === "You can't download past the end of the file."
+    const missingKey = error.message && error.message === 'Missing encryption key'
+    const invalidArguments = error.message && error.message.includes('EARGS (-2)')
 
-    if (!fileNotFound && !wrongKey && !invalidURL) {
+    if (!(fileNotFound || wrongKey || invalidURL || tooManyConnections ||
+      bandwithLimit || rangeError || missingKey || invalidArguments)) {
       setTimeout(() => {
         // Rollbar JavaScript API isn't compatible with Service Workers, so we're using the JSON API
         self.fetch('https://api.rollbar.com/api/1/item/', {
@@ -202,18 +223,32 @@ ${generateFileList(file, baseURL)}`
           })
         })
       }, 100)
-    }
-
-    if (fileNotFound || wrongKey || invalidURL) {
+    } else {
       const title = invalidURL ? 'Invalid URL'
         : fileNotFound ? 'File Not Found'
+        : tooManyConnections ? 'Too many connections'
+        : bandwithLimit ? 'Bandwith limit reached'
+        : rangeError ? 'Range error'
+        : missingKey ? 'Missing decryption key'
+        : invalidArguments ? 'Temporary error'
         : 'Invalid Decryption Key'
-      const message = invalidURL
+      const message = rangeError
+      ? `You specified an invalid download range.`
+      : bandwithLimit
+      ? `You're reached the bandwith limit.`
+      : tooManyConnections
+      ? `Too many connections are acessing this file. Try again later.`
+      : invalidURL
       ? `The provided URL includes invalid characters. Check it and try again.`
       : fileNotFound
       ? `Sorry, but the file you were trying to ${isView ? 'view' : 'download'} does not exist.`
+      : invalidArguments
+      ? `The server couldn't process your request. Try again later.`
       : `The provided decryption key is invalid. Check the URL and try again.`
-      const status = fileNotFound ? 404 : 403
+      const status = fileNotFound ? 404
+        : tooManyConnections || bandwithLimit ? 429
+        : rangeError ? 416
+        : 403
 
       // From HTML5 Boilerplate
       return new self.Response(
@@ -225,8 +260,8 @@ ${generateFileList(file, baseURL)}`
     }
 
     const errorKind = !error.message ? 'Internal error!'
-    : error.message.includes('ESID (-15)')
-    ? "That's a weird error from MEGA. Try again later."
+    : error.message.includes('ESID (-15)') || error.message.includes('EARGS (-2)')
+    ? "That's a weird error from MEGA. Please, try again later."
     : error.message.includes(' (-')
     ? "Seems it's an error from MEGA."
     : 'Unknown error!'
@@ -235,7 +270,7 @@ ${generateFileList(file, baseURL)}`
       new self.Blob([
         errorKind, '\n', error.stack || error,
         '\n\nYou can report this issue here: https://github.com/qgustavor/direct-mega/issues',
-        '\n\nYou can also try loading it directly in MEGA: ', requiredFile,
+        '\n\nYou can also try loading it directly in MEGA: https://mega.nz/#', identifier,
         '\nPlease note: if loading the file in MEGA fails then it will not load here.'
       ]),
       {status: 500, headers: { 'Content-Type': 'text/plain; charset=utf-8' }}

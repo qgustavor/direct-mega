@@ -1,4 +1,5 @@
 import { File } from 'megajs'
+import bytes from 'bytes'
 
 const location = window.location
 const body = document.body
@@ -92,9 +93,19 @@ function afterLoadAttributes (error, file) {
     document.body.removeChild(window.installingMessage)
     return
   }
+  
+  // 1 GiB = 1073741824  bytes
+  if (file.size > 1073741824) {
+    showMessage('This file is larger than 1GB: you may have problems with bandwidth limits.')
+  }
+
+  const start = extraArguments.start && bytes.parse(extraArguments.start)
+  const end = extraArguments.end && (bytes.parse(extraArguments.end) - 1 || null)
 
   const downloadStream = file.download({
-    returnCiphertext: !!extraArguments.cipher
+    returnCiphertext: !!extraArguments.cipher,
+    start,
+    end
   }, (err, data) => {
     afterDownload(err, data, file)
   })
