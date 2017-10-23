@@ -32,7 +32,7 @@ function handleFallback () {
     if (parts.length === 1) {
       obj[element.toLowerCase()] = true
     } else {
-      obj[parts[0].toLowerCase()] = parts.slice(1).join('=')
+      obj[parts[0].toLowerCase()] = window.decodeURIComponent(parts.slice(1).join('='))
     }
     return obj
   }, {})
@@ -93,7 +93,7 @@ function afterLoadAttributes (error, file) {
     document.body.removeChild(window.installingMessage)
     return
   }
-  
+
   // 1 GiB = 1073741824  bytes
   if (file.size > 1073741824) {
     showMessage('This file is larger than 1GB: you may have problems with bandwidth limits.')

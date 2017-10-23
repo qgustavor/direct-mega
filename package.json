@@ -4,9 +4,10 @@
   "description": "MEGA + Service Workers = Direct MEGA",
   "scripts": {
     "test": "standard",
-    "build": "npm run build:sw && npm run build:fallback",
+    "build": "npm run build:sw && npm run build:fallback && npm run build:splitter",
     "build:sw": "rollup --config rollup.sw.js",
     "build:fallback": "rollup --config rollup.fallback.js",
+    "build:splitter": "rollup --config rollup.splitter.js",
     "deploy": "gh-pages -d dist"
   },
   "repository": {
@@ -23,7 +24,8 @@
   "standard": {
     "ignore": [
       "dist/sw.js",
-      "dist/fallback.js"
+      "dist/fallback.js",
+      "dist/splitter.js"
     ]
   },
   "devDependencies": {
@@ -43,7 +45,7 @@
   "dependencies": {
     "bytes": "^3.0.0",
     "escape-html": "^1.0.3",
-    "megajs": "^0.12.3",
+    "megajs": "^0.12.8",
     "mime-types": "^2.1.17",
     "range-parser": "^1.2.0"
   }

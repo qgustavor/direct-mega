@@ -59,6 +59,16 @@ function fetchHandler (event) {
   if (!requestURL.includes(self.location.origin)) return
 
   const parsedURL = new self.URL(requestURL)
+
+  // Allow access to the splitter
+  if (parsedURL.pathname === '/splitter') return
+
+  // But remove the .html extension
+  if (parsedURL.pathname === '/splitter.html') {
+    event.respondWith(self.Response.redirect('/splitter'))
+    return
+  }
+
   const urlArguments = (parsedURL.search || '').substr(1).split('&')
   const identifier = urlArguments[0]
 
@@ -67,7 +77,7 @@ function fetchHandler (event) {
     if (parts.length === 1) {
       obj[element.toLowerCase()] = true
     } else {
-      obj[parts[0].toLowerCase()] = parts.slice(1).join('=')
+      obj[parts[0].toLowerCase()] = self.decodeURIComponent(parts.slice(1).join('='))
     }
     return obj
   }, {})
@@ -80,23 +90,25 @@ function fetchHandler (event) {
 
   const parts = identifier.split('!')
   const isDirectory = parts[0] === 'F'
-  const isValid = parts[0] === '' || isDirectory
+  const isValid = parts.length > 1 && (parts[0] === '' || isDirectory)
   const isView = parsedURL.pathname.includes('/view')
   const range = event.request.headers.get('Range')
 
   const response = isValid
   ? (new Promise((resolve, reject) => {
     if (!extraArguments.cipher && !parts[2]) throw Error('Missing encryption key')
+
     const file = new File({
       downloadId: parts[1],
       key: extraArguments.cipher ? null : parts[2],
       directory: isDirectory,
       loadedFile: parts[3]
     })
+
     file.loadAttributes((err, file) => {
       if (err) return reject(err)
 
-      if (file.children) {
+      if (file.directory) {
         const baseURL = parsedURL.origin + parsedURL.pathname + '?' + identifier.split('!').slice(0, 3).join('!')
         const folderContent = `<!DOCTYPE html><meta charset="utf-8">
 <title>"${escapeHTML(file.name)}" folder contents - Direct MEGA</title>
@@ -126,8 +138,8 @@ ${generateFileList(file, baseURL)}`
         headers['Date'] = headers['Last-Modified']
       }
 
-      let start = extraArguments.start && bytes.parse(extraArguments.start)
-      let end = extraArguments.end && (bytes.parse(extraArguments.end) - 1 || null)
+      let start = extraArguments.start && (bytes.parse(extraArguments.start) || null)
+      let end = extraArguments.end && (bytes.parse(extraArguments.end) || null)
 
       if (useHttpRange && range) {
         const parsedRange = rangeParser(file.size, range, { combine: true })
@@ -147,8 +159,10 @@ ${generateFileList(file, baseURL)}`
 
         headers['Content-Range'] = `bytes ${start}-${end}/${file.size}`
         headers['Content-Length'] = end - start + 1
+      } else if (end != null) {
+        headers['Content-Length'] = end - (start || 0) + 1
       } else {
-        headers['Content-Length'] = file.size
+        headers['Content-Length'] = file.size - (start || 0)
       }
 
       const fileName = extraArguments.name || file.name

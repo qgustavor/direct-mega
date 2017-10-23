@@ -1,0 +1,43 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title>Direct MEGA Splitter</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <style>
+      body {
+        margin: 40px auto;
+        max-width: 650px;
+        line-height: 1;
+        font-size: 18px;
+        color: #222;
+        padding: 0 10px
+      }
+      @media print {body { max-width: none; } }
+      h1,h2,h3 { line-height:1.2 }
+      input{width:100%}
+      pre{white-space:pre-wrap}
+      small{opacity:.8}
+      a{word-break:break-all}
+      li{padding-bottom:.5em}
+    </style>
+  </head>
+  <body>
+    <h1>Direct MEGA Splitter</h1>
+    <p>Files larger than MEGA's bandwidth limit? Split those!</p>
+    <form>
+      <p><label>MEGA URL:<br>
+        <small>(example: https://mega.nz/#!something!somethingsomething)</small>
+        <input name="url" type="url">
+      </label>
+      <p><label>Max part size:<br>
+        <small>(the bandwidth limit is not fixed, so choose a part size which fits yours)</small>
+        <input name="size" value="512 MB">
+      </label>
+      <p><button>Generate part links</button>
+    </form>
+    <output></output>
+    <script src="splitter.js"></script>
+  </body>
+</html>
+  
