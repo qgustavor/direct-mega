@@ -45,7 +45,7 @@
   "dependencies": {
     "bytes": "^3.0.0",
     "escape-html": "^1.0.3",
-    "megajs": "^0.12.8",
+    "megajs": "^0.13.1",
     "mime-types": "^2.1.17",
     "range-parser": "^1.2.0"
   }

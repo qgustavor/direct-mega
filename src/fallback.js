@@ -50,7 +50,12 @@ function handleFallback () {
 }
 
 function getFileList (file, baseURL) {
-  let fileList = document.createElement('ul')
+  if (!file.children) {
+    const emptyEl = document.createElement('i')
+    emptyEl.textContent = 'Empty folder'
+    return emptyEl
+  }
+  const fileList = document.createElement('ul')
   file.children.sort((left, right) => {
     return (left.name || '').localeCompare(right.name || '')
   }).forEach(file => {
@@ -97,6 +102,7 @@ function afterLoadAttributes (error, file) {
   // 1 GiB = 1073741824  bytes
   if (file.size > 1073741824) {
     showMessage('This file is larger than 1GB: you may have problems with bandwidth limits.')
+    showMessage('You can try using the splitter: https://directme.ga/splitter')
   }
 
   const start = extraArguments.start && bytes.parse(extraArguments.start)
@@ -113,16 +119,19 @@ function afterLoadAttributes (error, file) {
 }
 
 function handleProgress (stream, total) {
+  const prefix = 'Downloading: '
   const progressElement = document.createElement('p')
-  progressElement.textContent = '0%'
+  progressElement.textContent = prefix + '0%'
 
   stream.on('progress', function (data) {
-    progressElement.textContent = Math.floor(data.bytesLoaded * 100 / total) + '%'
+    progressElement.textContent = prefix + (data.bytesLoaded * 100 / total).toFixed(2) + '%'
   })
 
   stream.on('end', function () {
-    progressElement.textContent = '100%'
+    progressElement.textContent = 'Download finished.'
   })
+
+  body.appendChild(progressElement)
 }
 
 function afterDownload (error, data, file) {

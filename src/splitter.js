@@ -4,13 +4,27 @@ import bytes from 'bytes'
 const form = document.getElementsByTagName('form')[0]
 form.addEventListener('submit', handleSubmit)
 
+if (window.location.hash.match(/mega(\.co)?\.nz/)) {
+  form.elements.url.value = window.location.hash.substr(1)
+}
+
 const output = document.getElementsByTagName('output')[0]
 
 function handleSubmit (evt) {
   evt.preventDefault()
 
   const url = form.elements.url.value.trim()
+    // Accept URLs without protocol
+    .replace(/^(?!https?:\/\/)/i, 'https://')
+    // Accept Direct MEGA URL input
+    .replace(/https?:\/\/directme.ga\/[?#]([^&]+)/i, 'https://mega.nz/#$1')
+    // Normalize mega.co.nz to mega.nz
+    .replace('https://mega.co.nz/', 'https://mega.nz/')
+
   const size = bytes.parse(form.elements.size.value.trim())
+
+  // Show that's possible loading from the hash
+  window.location.hash = url
 
   output.textContent = 'Loading file info...'
 
@@ -63,7 +77,7 @@ function splitFile (url, file, partSize) {
   const name = file.name
   const base = url.replace(
     /https?:\/\/mega(\.co)?\.nz\/#/i,
-    'https://directme.ga/?'
+    'https://directme.ga/#'
   )
   const id = Array.isArray(file.downloadId)
     ? file.downloadId[0]
@@ -74,8 +88,8 @@ function splitFile (url, file, partSize) {
   }
 
   while (true) {
-    const end = start + partSize
-    const partName = `${id}-${parts.length}`
+    const end = start + partSize - 1
+    const partName = `${id}-${parts.length}.part`
     const url = `${base}&name=${partName}&start=${start}`
     names.push(partName)
 
@@ -84,7 +98,7 @@ function splitFile (url, file, partSize) {
       break
     } else {
       parts.push(`${url}&end=${end}`)
-      start = end
+      start = end + 1
     }
   }
 

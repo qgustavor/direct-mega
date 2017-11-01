@@ -39,6 +39,7 @@ const CSP_WHITELIST = [
 ]
 
 function generateFileList (file, baseURL) {
+  if (!file.children) return `<i>Empty folder</i>`
   return `<ul>${file.children.sort((left, right) => {
     return (left.name || '').localeCompare(right.name || '')
   }).map(file => {
@@ -52,6 +53,7 @@ function generateFileList (file, baseURL) {
   }).join('\n')}</ul>`
 }
 
+const FILE_CACHE = Object.create(null)
 function fetchHandler (event) {
   if (event.request.method !== 'GET') return
 
@@ -62,6 +64,7 @@ function fetchHandler (event) {
 
   // Allow access to the splitter
   if (parsedURL.pathname === '/splitter') return
+  if (parsedURL.pathname === '/splitter.js') return
 
   // But remove the .html extension
   if (parsedURL.pathname === '/splitter.html') {
@@ -105,8 +108,19 @@ function fetchHandler (event) {
       loadedFile: parts[3]
     })
 
-    file.loadAttributes((err, file) => {
+    const cacheId = parts[1] + '_' + parts[3]
+    if (FILE_CACHE[cacheId]) {
+      setTimeout(afterGotAttributes, 0, null, FILE_CACHE[cacheId])
+    } else {
+      file.loadAttributes(afterGotAttributes)
+    }
+
+    function afterGotAttributes (err, file) {
       if (err) return reject(err)
+
+      if (!FILE_CACHE[cacheId]) {
+        FILE_CACHE[cacheId] = file
+      }
 
       if (file.directory) {
         const baseURL = parsedURL.origin + parsedURL.pathname + '?' + identifier.split('!').slice(0, 3).join('!')
@@ -159,10 +173,8 @@ ${generateFileList(file, baseURL)}`
 
         headers['Content-Range'] = `bytes ${start}-${end}/${file.size}`
         headers['Content-Length'] = end - start + 1
-      } else if (end != null) {
-        headers['Content-Length'] = end - (start || 0) + 1
       } else {
-        headers['Content-Length'] = file.size - (start || 0)
+        headers['Content-Length'] = (end || (file.size - 1)) - (start || 0) + 1
       }
 
       const fileName = extraArguments.name || file.name
@@ -183,11 +195,29 @@ ${generateFileList(file, baseURL)}`
         end
       })
 
+      // Chrome doesn't call cancel method when it stops downloading
+      // But it always calls the pull method within 10ms after data
+      // is enqueued and stops calling it when it stops downloading
+      let cancelTimeout = null
+      function handleCancel () {
+        stream.emit('close')
+      }
+
       resolve(new self.Response(new self.ReadableStream({
         start: controller => {
-          stream.on('data', data => controller.enqueue(new Uint8Array(data)))
+          stream.on('data', data => {
+            // Sometimes it fails so check if pull is called within 5 seconds
+            if (cancelTimeout === null) {
+              cancelTimeout = setTimeout(handleCancel, 5e3)
+            }
+            controller.enqueue(new Uint8Array(data))
+          })
           stream.on('error', (error) => controller.error(error))
           stream.on('end', () => controller.close())
+        },
+        pull () {
+          clearTimeout(cancelTimeout)
+          cancelTimeout = null
         },
         cancel: () => {
           stream.emit('close')
@@ -196,7 +226,7 @@ ${generateFileList(file, baseURL)}`
         status: useHttpRange && range ? 206 : 200,
         headers
       }))
-    })
+    }
   })).catch(error => {
     const fileNotFound = error.message && (
       error.message.includes('ENOENT (-9)') ||
