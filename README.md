@@ -24,8 +24,7 @@ But you can use the splitter to workaround that: https://directme.ga/splitter
 **A:** If it's not download then there's a bug: clear your browser cache.  
 If it still don't works open an issue (or find other way to contact the developers).
 * **Q:** Where is the direct link?  
-**A:** MEGA files are encrypted, so there's no direct link. But this website skips the "start download"
-button and starts download immediately, so it's *almost* direct.
+**A:** To get a direct link, use the method to download shown above, but in the link change the '#' to a '?'. E.g. https://mega.nz/#!MAsFwa4b!d8o1uz6SffMAATSQmERLIYITkyc-eTbKQ6xqI3IQSms => https://directme.ga/?!MAsFwa4b!d8o1uz6SffMAATSQmERLIYITkyc-eTbKQ6xqI3IQSms
 * **Q:** Can I use it in some download manager?  
 **A:** It works using JavaScript, so no. If you open it in any download manager it will only download an HTML page and nothing else.
 * **Q:** How it works?  
