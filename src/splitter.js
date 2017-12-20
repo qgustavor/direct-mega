@@ -17,7 +17,7 @@ function handleSubmit (evt) {
     // Accept URLs without protocol
     .replace(/^(?!https?:\/\/)/i, 'https://')
     // Accept Direct MEGA URL input
-    .replace(/https?:\/\/directme.ga\/[?#]([^&]+)/i, 'https://mega.nz/#$1')
+    .replace(/https?:\/\/directme.ga\/(?:view)?[?#]([^&]+)/i, 'https://mega.nz/#$1')
     // Normalize mega.co.nz to mega.nz
     .replace('https://mega.co.nz/', 'https://mega.nz/')
 

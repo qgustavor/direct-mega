@@ -49,7 +49,10 @@ function generateFileList (file, baseURL) {
         ${generateFileList(file, baseURL)}
       </details></li>`
     }
-    return `<li><a href="${escapeHTML(baseURL + '!' + file.downloadId[1])}">${escapeHTML(file.name)}</a></li>`
+    return `<li>
+      <a href="${escapeHTML(baseURL + '!' + file.downloadId[1])}">${escapeHTML(file.name)}</a>
+      <small>${bytes(file.size)} - ${new Date(file.timestamp * 1000).toLocaleString()}</small>
+    </li>`
   }).join('\n')}</ul>`
 }
 
@@ -86,6 +89,7 @@ function fetchHandler (event) {
   }, {})
 
   // Shorthands
+  if (extraArguments.n) extraArguments.name = extraArguments.n
   if (extraArguments.c) extraArguments.cipher = extraArguments.c
   if (typeof extraArguments.cipher === 'string') {
     extraArguments.name = extraArguments.cipher
@@ -127,7 +131,7 @@ function fetchHandler (event) {
         const folderContent = `<!DOCTYPE html><meta charset="utf-8">
 <title>"${escapeHTML(file.name)}" folder contents - Direct MEGA</title>
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<style>body{margin:20px;line-height:1.6;font-size:18px;color:#444;padding:0 10px}h1,h2,h3{line-height:1.2}</style>
+<style>body{margin:20px;line-height:1.6;font-size:18px;color:#444;padding:0 10px}h1,h2,h3{line-height:1.2}small{float:right;opacity:.8}</style>
 <h1>"${escapeHTML(file.name)}" folder contents</h1>
 ${generateFileList(file, baseURL)}`
 
@@ -191,6 +195,7 @@ ${generateFileList(file, baseURL)}`
 
       const stream = file.download({
         returnCiphertext: !!extraArguments.cipher,
+        maxConnections: extraArguments.connections,
         start,
         end
       })

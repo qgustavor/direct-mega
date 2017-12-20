@@ -21,7 +21,7 @@ But you can use the splitter to workaround that: https://directme.ga/splitter
 ## FAQ:
 
 * **Q:** Why downloading don't work?  
-**A:** If it's not download then there's a bug: clear your browser cache.  
+**A:** If it's not downloading then there's a bug: clear your browser cache.  
 If it still don't works open an issue (or find other way to contact the developers).
 * **Q:** Where is the direct link?  
 **A:** MEGA files are encrypted, so there's no direct link. But this website skips the "start download"
