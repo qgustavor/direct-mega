@@ -299,7 +299,7 @@ ${generateFileList(file, baseURL)}`
       ? `The server returned a corrupted result. Try again later.`
       : `The provided decryption key is invalid. Check the URL and try again.`
       const status = fileNotFound ? 404
-        : tooManyConnections || bandwithLimit ? 429
+        : tooManyConnections || bandwidthLimit ? 429
         : rangeError ? 416
         : 403
 
