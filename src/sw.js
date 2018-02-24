@@ -241,13 +241,14 @@ ${generateFileList(file, baseURL)}`
     const wrongKey = error.message && error.message.includes('could not be decrypted')
     const invalidURL = error.message && error.message.includes('Invalid argument: ')
     const tooManyConnections = error.message && error.message.includes('ETOOMANY')
-    const bandwithLimit = error.message && error.message.includes('Bandwidth limit')
+    const bandwidthLimit = error.message && error.message.includes('Bandwidth limit')
     const rangeError = error.message && error.message === "You can't download past the end of the file."
     const missingKey = error.message && error.message === 'Missing encryption key'
     const invalidArguments = error.message && error.message.includes('EARGS (-2)')
+    const corruptedJSON = error.message && error.message.includes('Unexpected end of JSON input')
 
     if (!(fileNotFound || wrongKey || invalidURL || tooManyConnections ||
-      bandwithLimit || rangeError || missingKey || invalidArguments)) {
+      bandwidthLimit || rangeError || missingKey || invalidArguments || corruptedJSON)) {
       setTimeout(() => {
         // Rollbar JavaScript API isn't compatible with Service Workers, so we're using the JSON API
         self.fetch('https://api.rollbar.com/api/1/item/', {
@@ -276,15 +277,16 @@ ${generateFileList(file, baseURL)}`
       const title = invalidURL ? 'Invalid URL'
         : fileNotFound ? 'File Not Found'
         : tooManyConnections ? 'Too many connections'
-        : bandwithLimit ? 'Bandwith limit reached'
+        : bandwidthLimit ? 'Bandwidth limit reached'
         : rangeError ? 'Range error'
         : missingKey ? 'Missing decryption key'
         : invalidArguments ? 'Temporary error'
+        : corruptedJSON ? 'Temporary error'
         : 'Invalid Decryption Key'
       const message = rangeError
       ? `You specified an invalid download range.`
-      : bandwithLimit
-      ? `You're reached the bandwith limit.`
+      : bandwidthLimit
+      ? `You reached the bandwidth limit.`
       : tooManyConnections
       ? `Too many connections are acessing this file. Try again later.`
       : invalidURL
@@ -293,6 +295,8 @@ ${generateFileList(file, baseURL)}`
       ? `Sorry, but the file you were trying to ${isView ? 'view' : 'download'} does not exist.`
       : invalidArguments
       ? `The server couldn't process your request. Try again later.`
+      : corruptedJSON
+      ? `The server returned a corrupted result. Try again later.`
       : `The provided decryption key is invalid. Check the URL and try again.`
       const status = fileNotFound ? 404
         : tooManyConnections || bandwithLimit ? 429

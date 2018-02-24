@@ -34,10 +34,9 @@ function handleSubmit (evt) {
       <a href="${result.base}">${result.base}</a>`
       return
     }
-    const isWindows = navigator.platform === 'Win32' || navigator.platform === 'Windows'
-    const mergerName = isWindows
-      ? `merge-${result.id}.bat`
-      : `merge-${result.id}.sh`
+    // Based on https://stackoverflow.com/a/19883965 Win64 should be uncommon, but Firefox uses it
+    const isWindows = navigator.platform === 'Win32' || navigator.platform === 'Win64' || navigator.platform === 'Windows'
+    const mergerName = `merge-${result.id}.${isWindows ? 'bat' : 'sh'}`
     const merger = isWindows
       ? `copy /b ${result.names.join('+')} "${result.name}"`
       : `cat ${result.names.join(' ')} "${result.name}"`
