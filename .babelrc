@@ -1,9 +1,10 @@
 {
   "presets": [
-    ["latest", {
-      "es2015": {
-        "modules": false
-      }
+    ["env", {
+      "targets": {
+        "browsers": "defaults"
+      },
+      "modules": false
     }]
   ],
   "plugins": ["external-helpers"]

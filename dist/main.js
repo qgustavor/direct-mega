@@ -12,7 +12,11 @@
   var identifier = (location.hash.length > 2 ? location.hash : location.search || '').substr(1)
   var hasFile = identifier.startsWith('!') || identifier.startsWith('F!')
 
-  var compatible = typeof ReadableStream === 'function'
+  var compatible = typeof ReadableStream === 'function' &&
+    // Issue #17: Safari 11.1 downloads the HTML page instead of the Worker generated response
+    // It's impossible to detect using feature detection, so user agent sniffing is used
+    !navigator.userAgent.includes('Version/11.1 Safari')
+
   if (compatible) {
     try {
       ;(new window.ReadableStream()).getReader().read()

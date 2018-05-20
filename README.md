@@ -30,14 +30,15 @@ button and starts download immediately, so it's *almost* direct.
 **A:** It works using JavaScript, so no. If you open it in any download manager it will only download an HTML page and nothing else.
 * **Q:** How it works?  
 **A:** Downloading like the image shows uses Service Workers and Streams API.
-Currently only [Google Chrome / Chromium](https://www.chromestatus.com/feature/4531143755956224) supports that.
+Currently few browsers supports that, like [Google Chrome / Chromium](https://www.chromestatus.com/feature/4531143755956224).
 In other browsers it uses `Blob` and `a[download]` (similar to MEGA).
 
 ## Extra arguments
 
 * `&use-http-range`: uses the HTTP Range header which allows video and music seeking
-(disabled by default until bugs get fixed)
+(disabled by default as it can cause bugs and currently have bad performance)
 * `&start=X`: starts downloading from the X part of the file (default unit: byte)
 * `&end=X`: stops downloading at the X part of the file (default unit: byte)
 * `&name=X`: rename files downloaded
-* `&cipher`: downloads the encrypted file
+* `&cipher`: downloads the encrypted file, [in most cases](https://directme.ga/view?F!g4FlSYTZ!!MwEgnajY&c=kaban.png)
+it's not needed and will cause bugs

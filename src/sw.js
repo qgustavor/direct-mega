@@ -2,7 +2,7 @@
 
 import { File } from 'megajs'
 import escapeHTML from 'escape-html'
-import mime from 'mime-types'
+import mimeTypes from './mime-types.json'
 import rangeParser from 'range-parser'
 import bytes from 'bytes'
 
@@ -12,6 +12,10 @@ self.addEventListener('install', function (event) {
       scopes: [self.registration.scope],
       origins: ['*']
     })
+  }
+
+  if (navigator.userAgent.includes('Version/11.1 Safari')) {
+    throw Error('Safari 11.1 is not supported')
   }
 
   // Try to make an stream, if it fails the SW will not install
@@ -182,7 +186,7 @@ ${generateFileList(file, baseURL)}`
       }
 
       const fileName = extraArguments.name || file.name
-      const contentType = mime.contentType(fileName) || 'application/octet-stream'
+      const contentType = mimeTypes[fileName.toLowerCase().split('.').pop()] || 'application/octet-stream'
       if (isView) {
         if (!CSP_WHITELIST.find(type => contentType.startsWith(type))) {
           headers['Content-Security-Policy'] = 'default-src none ' + requestURL + '; sandbox'
@@ -208,8 +212,17 @@ ${generateFileList(file, baseURL)}`
         stream.emit('close')
       }
 
-      resolve(new self.Response(new self.ReadableStream({
+      const finalStream = new self.ReadableStream({
         start: controller => {
+          // Wait until the data is received to create a response
+          // so bandwidth limit errors can be caught
+          stream.once('data', data => {
+            resolve(new self.Response(finalStream, {
+              status: useHttpRange && range ? 206 : 200,
+              headers
+            }))
+          })
+
           stream.on('data', data => {
             // Sometimes it fails so check if pull is called within 5 seconds
             if (cancelTimeout === null) {
@@ -217,7 +230,12 @@ ${generateFileList(file, baseURL)}`
             }
             controller.enqueue(new Uint8Array(data))
           })
-          stream.on('error', (error) => controller.error(error))
+
+          stream.on('error', (error) => {
+            controller.error(error)
+            reject(error)
+          })
+
           stream.on('end', () => controller.close())
         },
         pull () {
@@ -227,16 +245,21 @@ ${generateFileList(file, baseURL)}`
         cancel: () => {
           stream.emit('close')
         }
-      }), {
-        status: useHttpRange && range ? 206 : 200,
-        headers
-      }))
+      })
     }
   })).catch(error => {
+    const invalidServerResponse = error.message && (
+      // Safari 11.1 promise errors
+      error.message.includes('promiseReactionJob@[native code]') ||
+      // Server or connection caused errors
+      error.message.includes('Unexpected end of JSON input') ||
+      error.message.includes('Failed to fetch')
+    )
     const fileNotFound = error.message && (
       error.message.includes('ENOENT (-9)') ||
       error.message.includes('EACCESS (-11)') ||
-      error.message.includes('EBLOCKED (-16)')
+      error.message.includes('EBLOCKED (-16)') ||
+      error.message.includes('Error: Node (file or folder) not found in folder')
     )
     const wrongKey = error.message && error.message.includes('could not be decrypted')
     const invalidURL = error.message && error.message.includes('Invalid argument: ')
@@ -245,10 +268,9 @@ ${generateFileList(file, baseURL)}`
     const rangeError = error.message && error.message === "You can't download past the end of the file."
     const missingKey = error.message && error.message === 'Missing encryption key'
     const invalidArguments = error.message && error.message.includes('EARGS (-2)')
-    const corruptedJSON = error.message && error.message.includes('Unexpected end of JSON input')
 
-    if (!(fileNotFound || wrongKey || invalidURL || tooManyConnections ||
-      bandwidthLimit || rangeError || missingKey || invalidArguments || corruptedJSON)) {
+    if (!(invalidServerResponse || fileNotFound || wrongKey || invalidURL || tooManyConnections ||
+      bandwidthLimit || rangeError || missingKey || invalidArguments)) {
       setTimeout(() => {
         // Rollbar JavaScript API isn't compatible with Service Workers, so we're using the JSON API
         self.fetch('https://api.rollbar.com/api/1/item/', {
@@ -275,18 +297,20 @@ ${generateFileList(file, baseURL)}`
       }, 100)
     } else {
       const title = invalidURL ? 'Invalid URL'
+        : invalidServerResponse ? 'Invalid server response'
         : fileNotFound ? 'File Not Found'
         : tooManyConnections ? 'Too many connections'
         : bandwidthLimit ? 'Bandwidth limit reached'
         : rangeError ? 'Range error'
         : missingKey ? 'Missing decryption key'
         : invalidArguments ? 'Temporary error'
-        : corruptedJSON ? 'Temporary error'
         : 'Invalid Decryption Key'
       const message = rangeError
       ? `You specified an invalid download range.`
       : bandwidthLimit
-      ? `You reached the bandwidth limit.`
+      ? `You reached the bandwidth limit. Please wait some time then try again or <a href="splitter">try using the splitter</a>.`
+      : invalidServerResponse
+      ? `The server returned an invalid response. Try again later. If the problem persists open a issue.`
       : tooManyConnections
       ? `Too many connections are acessing this file. Try again later.`
       : invalidURL
@@ -295,8 +319,6 @@ ${generateFileList(file, baseURL)}`
       ? `Sorry, but the file you were trying to ${isView ? 'view' : 'download'} does not exist.`
       : invalidArguments
       ? `The server couldn't process your request. Try again later.`
-      : corruptedJSON
-      ? `The server returned a corrupted result. Try again later.`
       : `The provided decryption key is invalid. Check the URL and try again.`
       const status = fileNotFound ? 404
         : tooManyConnections || bandwidthLimit ? 429

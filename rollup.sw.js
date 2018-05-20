@@ -4,7 +4,7 @@ import commonjs from 'rollup-plugin-commonjs'
 import globals from 'rollup-plugin-node-globals'
 import json from 'rollup-plugin-json'
 import resolve from 'rollup-plugin-node-resolve'
-import uglify from 'rollup-plugin-uglify'
+import { terser } from 'rollup-plugin-terser'
 
 export default {
   entry: 'src/sw.js',
@@ -21,9 +21,17 @@ export default {
       browser: true
     }),
     babel({
-      exclude: 'node_modules/**'
+      exclude: 'node_modules/**',
+      include: 'node_modules/megajs',
+      presets: ['env', {
+        targets: {
+          // Data from https://caniuse.com/#feat=streams and https://caniuse.com/#feat=serviceworkers
+          browsers: 'Edge >= 17, Firefox >= 59, Chrome >= 64, Safari > 11.1'
+        },
+        modules: false
+      }]
     }),
-    uglify()
+    terser()
   ],
   dest: 'dist/sw.js'
 }

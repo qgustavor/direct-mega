@@ -4,10 +4,11 @@
   "description": "MEGA + Service Workers = Direct MEGA",
   "scripts": {
     "test": "standard",
-    "build": "npm run build:sw && npm run build:fallback && npm run build:splitter",
+    "build": "npm run build:mime && npm run build:sw && npm run build:fallback && npm run build:splitter",
     "build:sw": "rollup --config rollup.sw.js",
     "build:fallback": "rollup --config rollup.fallback.js",
     "build:splitter": "rollup --config rollup.splitter.js",
+    "build:mime": "node generate-mime-types",
     "deploy": "gh-pages -d dist"
   },
   "repository": {
@@ -30,7 +31,7 @@
   },
   "devDependencies": {
     "babel-plugin-external-helpers": "^6.22.0",
-    "babel-preset-latest": "^6.24.0",
+    "babel-preset-env": "^1.7.0",
     "gh-pages": "^0.12.0",
     "rollup": "^0.41.5",
     "rollup-plugin-babel": "^2.7.1",
@@ -39,14 +40,14 @@
     "rollup-plugin-node-builtins": "^2.1.0",
     "rollup-plugin-node-globals": "^1.1.0",
     "rollup-plugin-node-resolve": "^2.0.0",
-    "rollup-plugin-uglify": "^1.0.1",
+    "rollup-plugin-terser": "^1.0.1",
     "standard": "^9.0.1"
   },
   "dependencies": {
     "bytes": "^3.0.0",
     "escape-html": "^1.0.3",
     "megajs": "^0.13.1",
-    "mime-types": "^2.1.17",
+    "mime-db": "^1.33.0",
     "range-parser": "^1.2.0"
   }
 }

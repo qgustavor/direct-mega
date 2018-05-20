@@ -4,7 +4,7 @@ import commonjs from 'rollup-plugin-commonjs'
 import globals from 'rollup-plugin-node-globals'
 import json from 'rollup-plugin-json'
 import resolve from 'rollup-plugin-node-resolve'
-import uglify from 'rollup-plugin-uglify'
+import { terser } from 'rollup-plugin-terser'
 
 export default {
   entry: 'src/splitter.js',
@@ -21,9 +21,10 @@ export default {
       browser: true
     }),
     babel({
-      exclude: 'node_modules/**'
+      exclude: 'node_modules/**',
+      include: 'node_modules/megajs'
     }),
-    uglify()
+    terser()
   ],
   dest: 'dist/splitter.js'
 }

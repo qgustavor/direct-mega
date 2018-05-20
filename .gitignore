@@ -56,3 +56,6 @@ typings/
 
 # dotenv environment variables file
 .env
+
+# mime-types.json is generated from mime-db
+src/mime-types.json
