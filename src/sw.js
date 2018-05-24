@@ -105,8 +105,20 @@ function fetchHandler (event) {
   const isView = parsedURL.pathname.includes('/view')
   const range = event.request.headers.get('Range')
 
-  const response = isValid
-  ? (new Promise((resolve, reject) => {
+  if (!isValid) {
+    // If 'main.js' is requested then the worker wasn't ready yet...
+    const response = parsedURL.pathname.includes('/main.js')
+      ? new self.Response(new self.Blob(['setTimeout(()=>location.reload(),9)'], {type: 'application/javascript'}))
+      // Service Worker is installed but no file was requested, check the hash and redirect to help page:
+      : new self.Response(new self.Blob([`<!doctype html><title>Direct MEGA</title>
+    <script>location.href=location.hash.length>1?location.href.replace('#','?')
+    :'https://github.com/qgustavor/direct-mega#direct-mega'</script>`], {type: 'text/html'}))
+
+    event.respondWith(response)
+    return
+  }
+
+  const response = (new Promise((resolve, reject) => {
     if (!extraArguments.cipher && !parts[2]) throw Error('Missing encryption key')
 
     const file = new File({
@@ -186,7 +198,8 @@ ${generateFileList(file, baseURL)}`
       }
 
       const fileName = extraArguments.name || file.name
-      const contentType = mimeTypes[fileName.toLowerCase().split('.').pop()] || 'application/octet-stream'
+      const extension = fileName && fileName.toLowerCase().split('.').pop()
+      const contentType = mimeTypes[extension] || 'application/octet-stream'
       if (isView) {
         if (!CSP_WHITELIST.find(type => contentType.startsWith(type))) {
           headers['Content-Security-Policy'] = 'default-src none ' + requestURL + '; sandbox'
@@ -296,34 +309,41 @@ ${generateFileList(file, baseURL)}`
         })
       }, 100)
     } else {
-      const title = invalidURL ? 'Invalid URL'
-        : invalidServerResponse ? 'Invalid server response'
-        : fileNotFound ? 'File Not Found'
-        : tooManyConnections ? 'Too many connections'
-        : bandwidthLimit ? 'Bandwidth limit reached'
-        : rangeError ? 'Range error'
-        : missingKey ? 'Missing decryption key'
-        : invalidArguments ? 'Temporary error'
-        : 'Invalid Decryption Key'
-      const message = rangeError
-      ? `You specified an invalid download range.`
-      : bandwidthLimit
-      ? `You reached the bandwidth limit. Please wait some time then try again or <a href="splitter">try using the splitter</a>.`
-      : invalidServerResponse
-      ? `The server returned an invalid response. Try again later. If the problem persists open a issue.`
-      : tooManyConnections
-      ? `Too many connections are acessing this file. Try again later.`
-      : invalidURL
-      ? `The provided URL includes invalid characters. Check it and try again.`
-      : fileNotFound
-      ? `Sorry, but the file you were trying to ${isView ? 'view' : 'download'} does not exist.`
-      : invalidArguments
-      ? `The server couldn't process your request. Try again later.`
-      : `The provided decryption key is invalid. Check the URL and try again.`
-      const status = fileNotFound ? 404
-        : tooManyConnections || bandwidthLimit ? 429
-        : rangeError ? 416
-        : 403
+      const errorIndex = [
+        invalidURL,
+        invalidServerResponse,
+        fileNotFound,
+        tooManyConnections,
+        bandwidthLimit,
+        rangeError,
+        missingKey,
+        invalidArguments,
+        wrongKey
+      ].indexOf(true)
+      const title = [
+        'Invalid URL',
+        'Invalid server response',
+        'File not found',
+        'Too many connections',
+        'Bandwidth limit reached',
+        'Range error',
+        'Missing decryption key',
+        'Temporary error',
+        'Invalid decryption Key'
+      ][errorIndex]
+      const message = [
+        'The provided URL includes invalid characters. Check it and try again.',
+        'The server returned an invalid response. Try again later. If the problem persists open a issue.',
+        `Sorry, but the file you were trying to ${isView ? 'view' : 'download'} does not exist.`,
+        'Too many connections are acessing this file. Try again later.',
+        'You reached the bandwidth limit. Please wait some time then try again or <a href="splitter">try using the splitter</a>.',
+        'You specified an invalid download range.',
+        'The provided decryption key is invalid. Check the URL and try again.',
+        "The server couldn't process your request. Try again later.",
+        'The provided decryption key is invalid. Check the URL and try again.'
+      ][errorIndex]
+      const status = tooManyConnections || bandwidthLimit ? 429
+        : fileNotFound ? 404 : rangeError ? 416 : 403
 
       // From HTML5 Boilerplate
       return new self.Response(
@@ -335,11 +355,11 @@ ${generateFileList(file, baseURL)}`
     }
 
     const errorKind = !error.message ? 'Internal error!'
-    : error.message.includes('ESID (-15)') || error.message.includes('EARGS (-2)')
-    ? "That's a weird error from MEGA. Please, try again later."
-    : error.message.includes(' (-')
-    ? "Seems it's an error from MEGA."
-    : 'Unknown error!'
+      : error.message.includes('ESID (-15)') || error.message.includes('EARGS (-2)')
+        ? "That's a weird error from MEGA. Please, try again later."
+        : error.message.includes(' (-')
+          ? "Seems it's an error from MEGA."
+          : 'Unknown error!'
 
     return new self.Response(
       new self.Blob([
@@ -351,13 +371,6 @@ ${generateFileList(file, baseURL)}`
       {status: 500, headers: { 'Content-Type': 'text/plain; charset=utf-8' }}
     )
   })
-  // If 'main.js' is requested then the worker wasn't ready yet...
-  : parsedURL.pathname.includes('/main.js')
-  ? new self.Response(new self.Blob(['setTimeout(()=>location.reload(),9)'], {type: 'application/javascript'}))
-  // Service Worker is installed but no file was requested, check the hash and redirect to help page:
-  : new self.Response(new self.Blob([`<!doctype html><title>Direct MEGA</title>
-    <script>location.href=location.hash.length>1?location.href.replace('#','?')
-    :'https://github.com/qgustavor/direct-mega#direct-mega'</script>`], {type: 'text/html'}))
 
   event.respondWith(response)
 }

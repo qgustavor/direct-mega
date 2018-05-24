@@ -27,14 +27,14 @@
 
   if (navigator.serviceWorker && compatible) {
     navigator.serviceWorker.register('sw.js', {scope: '.'})
-    .then(navigator.serviceWorker.ready)
-    .then(function () {
-      if (hasFile) {
-        location.href = location.pathname + '?' + identifier
-      } else {
-        location.href = 'https://github.com/qgustavor/direct-mega#direct-mega'
-      }
-    }, fallback)
+      .then(navigator.serviceWorker.ready)
+      .then(function () {
+        if (hasFile) {
+          location.href = location.pathname + '?' + identifier
+        } else {
+          location.href = 'https://github.com/qgustavor/direct-mega#direct-mega'
+        }
+      }, fallback)
   } else if (hasFile) {
     fallback()
   } else {

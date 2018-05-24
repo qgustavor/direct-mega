@@ -29,6 +29,23 @@ function handleSubmit (evt) {
   output.textContent = 'Loading file info...'
 
   splitFromURL(url, size).then(result => {
+    if (result.folder) {
+      const list = document.createElement('ul')
+      const files = createFileList(result.folder)
+      for (let {file, filePath} of files) {
+        const li = document.createElement('li')
+        const anchor = document.createElement('a')
+        anchor.textContent = filePath
+        anchor.href = '#' + url + '!' + file.downloadId[1]
+        anchor.addEventListener('click', handleFileClick)
+        li.appendChild(anchor)
+        list.appendChild(li)
+      }
+      output.innerHTML = `This URL points to a folder. Select a file:<br>`
+      output.appendChild(list)
+      return
+    }
+    
     if (!result.parts) {
       output.innerHTML = `This file is smaller than the part size. You can download it by this URL:<br>
       <a href="${result.base}">${result.base}</a>`
@@ -59,14 +76,10 @@ function splitFromURL (url, size) {
       if (error) return reject(error)
 
       resolve(node.directory
-      ? splitFolder(url, node, size)
-      : splitFile(url, node, size))
+        ? { folder: node }
+        : splitFile(url, node, size))
     })
   })
-}
-
-function splitFolder (url, folder, partSize) {
-  throw Error('Folder splitting is not implemented')
 }
 
 function splitFile (url, file, partSize) {
@@ -102,4 +115,24 @@ function splitFile (url, file, partSize) {
   }
 
   return {parts, names, name, id}
+}
+
+function createFileList (topFile, basename) {
+  return [].concat(topFile.children).map(file => {
+    if (!file) return []
+    const filename = file.name || '[encrypted filename]'
+    const filePath = basename ? basename + '/' + filename : filename
+
+    return file.directory
+    ? createFileList(file, filePath)
+    : {file, filePath}
+  })
+  .reduce((all, sub) => all.concat(sub), [])
+  .sort((fileA, fileB) => fileA.filePath.localeCompare(fileB.filePath))
+}
+
+function handleFileClick (evt) {
+  location.hash = evt.target.hash
+  form.elements.url.value = location.hash.substr(1)
+  handleSubmit(evt)
 }
