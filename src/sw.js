@@ -199,7 +199,16 @@ ${generateFileList(file, baseURL)}`
 
       const fileName = extraArguments.name || file.name
       const extension = fileName && fileName.toLowerCase().split('.').pop()
-      const contentType = mimeTypes[extension] || 'application/octet-stream'
+      const contentType = mimeTypes[extension]
+
+      // If the content type is not known then the file is blacklisted: redirect to MEGA
+      // (PDFs are only allowed to be viewed, not downloaded, as browsers PDF reader
+      // usually have less vulnerabilities than others PDF readers)
+      if (!contentType || (contentType === 'application/pdf' && !isView)) {
+        resolve(self.Response.redirect('https://mega.nz/#' + identifier, 302))
+        return
+      }
+
       if (isView) {
         if (!CSP_WHITELIST.find(type => contentType.startsWith(type))) {
           headers['Content-Security-Policy'] = 'default-src none ' + requestURL + '; sandbox'

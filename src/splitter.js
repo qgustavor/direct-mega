@@ -45,7 +45,7 @@ function handleSubmit (evt) {
       output.appendChild(list)
       return
     }
-    
+
     if (!result.parts) {
       output.innerHTML = `This file is smaller than the part size. You can download it by this URL:<br>
       <a href="${result.base}">${result.base}</a>`
@@ -124,15 +124,15 @@ function createFileList (topFile, basename) {
     const filePath = basename ? basename + '/' + filename : filename
 
     return file.directory
-    ? createFileList(file, filePath)
-    : {file, filePath}
+      ? createFileList(file, filePath)
+      : {file, filePath}
   })
-  .reduce((all, sub) => all.concat(sub), [])
-  .sort((fileA, fileB) => fileA.filePath.localeCompare(fileB.filePath))
+    .reduce((all, sub) => all.concat(sub), [])
+    .sort((fileA, fileB) => fileA.filePath.localeCompare(fileB.filePath))
 }
 
 function handleFileClick (evt) {
-  location.hash = evt.target.hash
-  form.elements.url.value = location.hash.substr(1)
+  window.location.hash = evt.target.hash
+  form.elements.url.value = window.location.hash.substr(1)
   handleSubmit(evt)
 }
