@@ -1,4 +1,4 @@
-(function () {
+;(function () {
   var header = document.createElement('h1')
   header.textContent = 'Direct MEGA'
   document.body.appendChild(header)
@@ -43,6 +43,12 @@
   function fallback () {
     var script = document.createElement('script')
     script.src = 'fallback.js'
+    script.onerror = handleFallbackError
     document.head.appendChild(script)
+  }
+  function handleFallbackError () {
+    var errorMessage = document.createElement('p')
+    errorMessage.textContent = 'An error happened while loading. Check your network connection and try again.'
+    document.body.appendChild(errorMessage)
   }
 }())
