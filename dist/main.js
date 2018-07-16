@@ -1,4 +1,5 @@
 ;(function () {
+  var helpURL = 'https://github.com/qgustavor/direct-mega#direct-mega'
   var header = document.createElement('h1')
   header.textContent = 'Direct MEGA'
   document.body.appendChild(header)
@@ -32,13 +33,13 @@
         if (hasFile) {
           location.href = location.pathname + '?' + identifier
         } else {
-          location.href = 'https://github.com/qgustavor/direct-mega#direct-mega'
+          location.href = helpURL
         }
       }, fallback)
   } else if (hasFile) {
     fallback()
   } else {
-    location.href = 'https://github.com/qgustavor/direct-mega#direct-mega'
+    location.href = helpURL
   }
   function fallback () {
     var script = document.createElement('script')
@@ -48,7 +49,7 @@
   }
   function handleFallbackError () {
     var errorMessage = document.createElement('p')
-    errorMessage.textContent = 'An error happened while loading. Check your network connection and try again.'
+    errorMessage.textContent = 'An error happened while loading. Check your network connection then try again.'
     document.body.appendChild(errorMessage)
   }
 }())
