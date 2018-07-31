@@ -1,6 +1,8 @@
 # Direct MEGA
 MEGA downloads working like normal downloads!
 
+**Note:** [this website will close](https://github.com/qgustavor/direct-mega/issues/21).
+
 ![Screenshot](https://i.imgur.com/750OurF.png)
 
 [Download the file above](https://directme.ga/?!MAsFwa4b!d8o1uz6SffMAATSQmERLIYITkyc-eTbKQ6xqI3IQSms) or [watch it](https://directme.ga/view?!MAsFwa4b!d8o1uz6SffMAATSQmERLIYITkyc-eTbKQ6xqI3IQSms) ([original link](https://mega.nz/#!MAsFwa4b!d8o1uz6SffMAATSQmERLIYITkyc-eTbKQ6xqI3IQSms)).
