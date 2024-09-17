@@ -1,4 +1,0 @@
-# Ignore JavaScript files, which are build by Rollup
-*.js
-# Except main.js
-!main.js
